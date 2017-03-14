@@ -18,9 +18,8 @@ package com.cjwwdev.auth.config
 import com.typesafe.config.ConfigFactory
 
 private[auth] trait ApplicationConfiguration {
-  val config = ConfigFactory.load
-  val env = config.getString("cjww.environment")
+  val config                = ConfigFactory.load
 
-  val authMicroservice = s"$env.routes.auth-microservice"
-  val accountsMicroservice = s"$env.routes.accounts-microservice"
+  val authMicroservice      = config.getString("routes.auth-microservice")
+  val accountsMicroservice  = config.getString("routes.accounts-microservice")
 }
