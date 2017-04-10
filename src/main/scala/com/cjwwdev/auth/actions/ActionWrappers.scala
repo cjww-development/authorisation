@@ -30,7 +30,7 @@ trait ActionWrappers extends Results {
   def withAuthenticatedUser(call : Call)(userAction: AuthContext => Action[AnyContent]): Action[AnyContent] = Action.async {
     implicit request =>
       authConnector.getContext flatMap {
-        case context : AuthContext =>
+        case Some(context) =>
           Logger.info(s"Authenticated as ${context.user.userId} on ${request.path}")
           userAction(context)(request)
         case _ =>
@@ -42,7 +42,7 @@ trait ActionWrappers extends Results {
   def withPotentialUser(userAction: Option[AuthContext] => Action[AnyContent]): Action[AnyContent] = Action.async {
     implicit request =>
       authConnector.getContext flatMap {
-        case context : AuthContext =>
+        case Some(context) =>
           Logger.info(s"Authenticated as ${context.user.userId} on ${request.path}")
           userAction(Some(context))(request)
         case _ =>

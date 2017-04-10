@@ -30,7 +30,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class AuthConnector @Inject()(http: Http) extends ApplicationConfiguration with SessionUtils {
   def getContext(implicit request: Request[_]): Future[Option[AuthContext]] = {
     getContextId match {
-      case id => http.GET[AuthContext](s"$authMicroservice/get-context/$id") map {
+      case id: String => http.GET[AuthContext](s"$authMicroservice/get-context/$id") map {
         context => Some(context)
       }
       case _ => Future.successful(None)
