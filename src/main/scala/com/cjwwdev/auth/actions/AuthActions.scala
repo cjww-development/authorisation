@@ -16,15 +16,16 @@
 
 package com.cjwwdev.auth.actions
 
-import com.google.inject.{Inject, Singleton}
+import com.cjwwdev.auth.connectors.AuthConnector
 import com.cjwwdev.auth.models.AuthContext
 import play.api.mvc._
 
 import scala.concurrent.Future
 import scala.language.implicitConversions
 
-@Singleton
-class Actions @Inject()(actionWrapper: ActionWrappers) extends AuthActions {
+trait Actions extends AuthActions with ActionWrappers {
+
+  self: AuthConnector =>
 
   private type PlayRequest = (Request[AnyContent] => Result)
   private type AsyncPlayRequest = (Request[AnyContent] => Future[Result])
@@ -51,18 +52,18 @@ class Actions @Inject()(actionWrapper: ActionWrappers) extends AuthActions {
     def async(body : AsyncPlayUserRequest) : Action[AnyContent] = authorised(body)
 
     private def authorised(body : UserAction) = {
-      actionWrapper.withAuthenticatedUser(loginCall) {
+      withAuthenticatedUser(loginCall) {
         implicit account => body(account)
       }
     }
   }
 
-  class Unauthenticated() extends UnauthenticatedAction {
+  class Unauthenticated extends UnauthenticatedAction {
     def apply(body : OptionPlayUserRequest) : Action[AnyContent] = unauthorised(body)
     def async(body : OptionAsyncPlayUserRequest) : Action[AnyContent] = unauthorised(body)
 
     private def unauthorised(body : OptionUserAction) = {
-      actionWrapper.withPotentialUser() {
+      withPotentialUser {
         implicit account => body(account)
       }
     }

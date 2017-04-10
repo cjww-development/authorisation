@@ -13,9 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-package com.cjwwdev.auth.actions
 
-import javax.inject.{Inject, Singleton}
+package com.cjwwdev.auth.actions
 
 import com.cjwwdev.auth.connectors.AuthConnector
 import com.cjwwdev.auth.models.AuthContext
@@ -24,11 +23,13 @@ import play.api.mvc.{Action, AnyContent, Call, Results}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-@Singleton
-class ActionWrappers @Inject()(authConnector: AuthConnector) extends Results {
+trait ActionWrappers extends Results {
+
+  self: AuthConnector =>
+
   def withAuthenticatedUser(call : Call)(userAction: AuthContext => Action[AnyContent]): Action[AnyContent] = Action.async {
     implicit request =>
-      authConnector.getContext flatMap {
+      getContext flatMap {
         case context : AuthContext =>
           Logger.info(s"Authenticated as ${context.user.userId} on ${request.path}")
           userAction(context)(request)
@@ -38,9 +39,9 @@ class ActionWrappers @Inject()(authConnector: AuthConnector) extends Results {
       }
   }
 
-  def withPotentialUser()(userAction: Option[AuthContext] => Action[AnyContent]): Action[AnyContent] = Action.async {
+  def withPotentialUser(userAction: Option[AuthContext] => Action[AnyContent]): Action[AnyContent] = Action.async {
     implicit request =>
-      authConnector.getContext flatMap {
+      getContext flatMap {
         case context : AuthContext =>
           Logger.info(s"Authenticated as ${context.user.userId} on ${request.path}")
           userAction(Some(context))(request)
