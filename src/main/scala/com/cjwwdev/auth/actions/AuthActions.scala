@@ -25,7 +25,7 @@ import scala.language.implicitConversions
 
 trait Actions extends AuthActions with ActionWrappers {
 
-  self: AuthConnector =>
+  val authConnector: AuthConnector
 
   private type PlayRequest = (Request[AnyContent] => Result)
   private type AsyncPlayRequest = (Request[AnyContent] => Future[Result])

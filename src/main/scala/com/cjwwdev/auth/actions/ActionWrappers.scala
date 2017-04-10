@@ -25,11 +25,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 trait ActionWrappers extends Results {
 
-  self: AuthConnector =>
+  val authConnector: AuthConnector
 
   def withAuthenticatedUser(call : Call)(userAction: AuthContext => Action[AnyContent]): Action[AnyContent] = Action.async {
     implicit request =>
-      getContext flatMap {
+      authConnector.getContext flatMap {
         case context : AuthContext =>
           Logger.info(s"Authenticated as ${context.user.userId} on ${request.path}")
           userAction(context)(request)
@@ -41,7 +41,7 @@ trait ActionWrappers extends Results {
 
   def withPotentialUser(userAction: Option[AuthContext] => Action[AnyContent]): Action[AnyContent] = Action.async {
     implicit request =>
-      getContext flatMap {
+      authConnector.getContext flatMap {
         case context : AuthContext =>
           Logger.info(s"Authenticated as ${context.user.userId} on ${request.path}")
           userAction(Some(context))(request)
