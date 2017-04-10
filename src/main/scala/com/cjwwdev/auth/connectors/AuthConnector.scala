@@ -24,10 +24,16 @@ import com.cjwwdev.http.verbs.Http
 import play.api.mvc.Request
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class AuthConnector @Inject()(http: Http) extends ApplicationConfiguration with SessionUtils {
-  def getContext(implicit request: Request[_]): Future[AuthContext] = {
-    http.GET[AuthContext](s"$authMicroservice/get-context/$getContextId")
+  def getContext(implicit request: Request[_]): Future[Option[AuthContext]] = {
+    getContextId match {
+      case id => http.GET[AuthContext](s"$authMicroservice/get-context/$id") map {
+        context => Some(context)
+      }
+      case _ => Future.successful(None)
+    }
   }
 }
