@@ -34,6 +34,7 @@ class AuthConnector @Inject()(http: Http) extends ApplicationConfiguration with 
       DataSecurity.decryptInto[AuthContext](resp.body)
     } recover {
       case notFound: NotFoundException => None
+      case forbidden: ForbiddenException => throw forbidden
     }
   }
 }
