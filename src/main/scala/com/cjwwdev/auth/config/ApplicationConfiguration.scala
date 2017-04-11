@@ -19,7 +19,5 @@ import com.typesafe.config.ConfigFactory
 
 private[auth] trait ApplicationConfiguration {
   val config                = ConfigFactory.load
-
   val authMicroservice      = config.getString("routes.auth-microservice")
-  val accountsMicroservice  = config.getString("routes.accounts-microservice")
 }

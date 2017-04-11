@@ -21,6 +21,7 @@ import com.cjwwdev.auth.config.ApplicationConfiguration
 import com.cjwwdev.auth.models.AuthContext
 import com.cjwwdev.http.utils.SessionUtils
 import com.cjwwdev.http.verbs.Http
+import com.cjwwdev.security.encryption.DataSecurity
 import play.api.mvc.Request
 
 import scala.concurrent.Future
@@ -29,11 +30,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 @Singleton
 class AuthConnector @Inject()(http: Http) extends ApplicationConfiguration with SessionUtils {
   def getContext(implicit request: Request[_]): Future[Option[AuthContext]] = {
-    getContextId match {
-      case id: String => http.GET[AuthContext](s"$authMicroservice/get-context/$id") map {
-        context => Some(context)
-      }
-      case _ => Future.successful(None)
+    http.GET(s"$authMicroservice/get-context/$getContextId") map { resp =>
+      DataSecurity.decryptInto[AuthContext](resp.body)
     }
   }
 }
