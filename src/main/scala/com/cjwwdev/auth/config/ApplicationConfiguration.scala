@@ -15,9 +15,8 @@
 // limitations under the License.
 package com.cjwwdev.auth.config
 
-import com.typesafe.config.ConfigFactory
+import com.cjwwdev.bootstrap.config.BaseConfiguration
 
-private[auth] trait ApplicationConfiguration {
-  val config                = ConfigFactory.load
+private[auth] trait ApplicationConfiguration extends BaseConfiguration {
   val authMicroservice      = config.getString("routes.auth-microservice")
 }
