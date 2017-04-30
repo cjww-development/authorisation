@@ -10,14 +10,14 @@ val btVersion: String = {
 
 name := "authorisation"
 version := btVersion
-scalaVersion := "2.11.10"
+scalaVersion := "2.11.11"
 organization := "com.cjww-dev.libs"
 
 val cjwwDep: Seq[ModuleID] = Seq(
-  "com.cjww-dev.libs" %% "http-verbs" % "0.11.0",
-  "com.cjww-dev.libs" %% "logging" % "0.2.0",
-  "com.cjww-dev.libs" %% "data-security" % "0.6.0",
-  "com.cjww-dev.libs" %% "bootstrapper" % "0.7.0"
+  "com.cjww-dev.libs" %% "http-verbs" % "0.12.0",
+  "com.cjww-dev.libs" %% "logging" % "0.3.0",
+  "com.cjww-dev.libs" %% "data-security" % "0.8.0",
+  "com.cjww-dev.libs" %% "bootstrapper" % "0.8.0"
 )
 val codeDep: Seq[ModuleID] = Seq("com.typesafe.play" % "play_2.11" % "2.5.14")
 val testDep: Seq[ModuleID] = Seq(
