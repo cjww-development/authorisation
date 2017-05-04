@@ -26,11 +26,6 @@ case class AuthContext(contextId: String,
                        settingsUri: String)
 
 object AuthContext {
-  implicit val format: Format[AuthContext] = (
-    (__ \ "_id").format[String] and
-    (__ \ "user").format[User] and
-    (__ \ "basicDetailsUri").format[String] and
-    (__ \ "enrolmentsUri").format[String] and
-    (__ \ "settingsUri").format[String]
-  )(AuthContext.apply, unlift(AuthContext.unapply))
+  implicit val formatUser = Json.format[User]
+  implicit val formatContext = Json.format[AuthContext]
 }
