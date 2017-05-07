@@ -20,7 +20,9 @@ import play.api.libs.json.Json
 
 case class User(userId: String,
                 firstName: String,
-                lastName: String)
+                lastName: String,
+                credentialType: String,
+                role: Option[String])
 
 object User {
   implicit val format = Json.format[User]
