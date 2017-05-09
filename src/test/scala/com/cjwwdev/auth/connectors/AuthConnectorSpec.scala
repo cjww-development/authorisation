@@ -38,8 +38,9 @@ class AuthConnectorSpec extends PlaySpec with MockitoSugar with OneAppPerSuite {
       "testCID",
       User(
         "testUID",
-        "testFirstName",
-        "testLastName",
+        Some("testFirstName"),
+        Some("testLastName"),
+        None,
         "individual",
         Some("student")
       ),

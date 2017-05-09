@@ -19,8 +19,9 @@ package com.cjwwdev.auth.models
 import play.api.libs.json.Json
 
 case class User(userId: String,
-                firstName: String,
-                lastName: String,
+                firstName: Option[String],
+                lastName: Option[String],
+                orgName: Option[String],
                 credentialType: String,
                 role: Option[String])
 
