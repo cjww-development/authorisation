@@ -18,5 +18,5 @@ package com.cjwwdev.auth.config
 import com.cjwwdev.bootstrap.config.BaseConfiguration
 
 private[auth] trait ApplicationConfiguration extends BaseConfiguration {
-  val authMicroservice      = config.getString("routes.auth-microservice")
+  val authMicroservice      = config.getString(s"$env.routes.auth-microservice")
 }
