@@ -20,14 +20,12 @@ import java.util.UUID
 import play.api.libs.json.Json
 
 case class SessionDetails(contextId: String, firstName: String, lastName: String) {
-  def sessionMap: Map[String, String] = {
-    Map(
-      "cookieId"  -> s"session${UUID.randomUUID}",
-      "contextId" -> contextId,
-      "firstName" -> firstName,
-      "lastName"  -> lastName
-    )
-  }
+  def sessionMap: Map[String, String] = Map(
+    "cookieId"  -> s"session${UUID.randomUUID}",
+    "contextId" -> contextId,
+    "firstName" -> firstName,
+    "lastName"  -> lastName
+  )
 }
 
 object SessionDetails {

@@ -16,7 +16,8 @@ val cjwwDep: Seq[ModuleID] = Seq(
   "com.cjww-dev.libs" %% "http-verbs" % "1.0.0",
   "com.cjww-dev.libs" %% "logging" % "0.6.0",
   "com.cjww-dev.libs" %% "data-security" % "1.1.0",
-  "com.cjww-dev.libs" %% "bootstrapper" % "1.5.0"
+  "com.cjww-dev.libs" %% "bootstrapper" % "1.5.0",
+  "com.cjww-dev.libs" %% "application-utilities" % "0.2.0"
 )
 val codeDep: Seq[ModuleID] = Seq("com.typesafe.play" % "play_2.11" % "2.5.15")
 val testDep: Seq[ModuleID] = Seq(
