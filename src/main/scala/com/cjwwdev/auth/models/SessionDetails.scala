@@ -17,7 +17,9 @@ package com.cjwwdev.auth.models
 
 import java.util.UUID
 
-import play.api.libs.json.Json
+import com.cjwwdev.json.JsonFormats
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
 case class SessionDetails(contextId: String, firstName: String, lastName: String) {
   def sessionMap: Map[String, String] = Map(
@@ -28,6 +30,10 @@ case class SessionDetails(contextId: String, firstName: String, lastName: String
   )
 }
 
-object SessionDetails {
-  implicit val format = Json.format[SessionDetails]
+object SessionDetails extends JsonFormats[SessionDetails] {
+  override implicit val standardFormat: OFormat[SessionDetails] = (
+    (__ \ "contextId").format[String] and
+    (__ \ "firstName").format[String] and
+    (__ \ "lastName").format[String]
+  )(SessionDetails.apply, unlift(SessionDetails.unapply))
 }

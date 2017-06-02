@@ -42,12 +42,8 @@ trait ActionWrappers extends Results {
   def withPotentialUser(userAction: Option[AuthContext] => Action[AnyContent]): Action[AnyContent] = Action.async {
     implicit request =>
       authConnector.getContext flatMap {
-        case Some(context) =>
-          Logger.info(s"Authenticated as ${context.user.userId} on ${request.path}")
-          userAction(Some(context))(request)
-        case _ =>
-          Logger.info(s"Unauthenticated user on ${request.path}")
-          userAction(None)(request)
+        case Some(context)  => userAction(Some(context))(request)
+        case _              => userAction(None)(request)
       }
   }
 }
