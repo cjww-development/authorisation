@@ -19,11 +19,10 @@ import javax.inject.{Inject, Singleton}
 
 import com.cjwwdev.auth.config.ApplicationConfiguration
 import com.cjwwdev.auth.models.AuthContext
+import com.cjwwdev.http.exceptions.NotFoundException
 import com.cjwwdev.http.utils.SessionUtils
 import com.cjwwdev.http.verbs.Http
-import com.cjwwdev.security.encryption.DataSecurity
 import play.api.mvc.Request
-import play.api.http.Status.{OK, NOT_FOUND}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -31,11 +30,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 @Singleton
 class AuthConnector @Inject()(http: Http) extends ApplicationConfiguration with SessionUtils {
   def getContext(implicit request: Request[_]): Future[Option[AuthContext]] = {
-    http.GET(s"$authMicroservice/get-context/$getContextId") map { resp =>
-      resp.status match {
-        case OK => DataSecurity.decryptIntoType[AuthContext](resp.body)
-        case NOT_FOUND => None
-      }
+    http.GET[AuthContext](s"$authMicroservice/get-context/$getContextId") map {
+      resp => Some(resp)
+    } recover {
+      case _: NotFoundException => None
     }
   }
 }
