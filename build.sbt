@@ -17,12 +17,12 @@ val cjwwDep: Seq[ModuleID] = Seq(
   "com.cjww-dev.libs" %% "logging" % "0.7.0",
   "com.cjww-dev.libs" %% "data-security" % "1.2.0",
   "com.cjww-dev.libs" %% "bootstrapper" % "1.6.0",
-  "com.cjww-dev.libs" %% "application-utilities" % "0.7.0"
+  "com.cjww-dev.libs" %% "application-utilities" % "0.8.0"
 )
 val codeDep: Seq[ModuleID] = Seq("com.typesafe.play" % "play_2.11" % "2.5.15")
 val testDep: Seq[ModuleID] = Seq(
   "org.scalatestplus.play" % "scalatestplus-play_2.11" % "2.0.0",
-  "org.mockito" % "mockito-core" % "2.8.9"
+  "org.mockito" % "mockito-core" % "2.8.47"
 )
 
 libraryDependencies ++= cjwwDep
