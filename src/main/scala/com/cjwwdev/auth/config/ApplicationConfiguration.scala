@@ -15,7 +15,7 @@
 // limitations under the License.
 package com.cjwwdev.auth.config
 
-import com.cjwwdev.bootstrap.config.BaseConfiguration
+import com.cjwwdev.config.BaseConfiguration
 
 private[auth] trait ApplicationConfiguration extends BaseConfiguration {
   val authMicroservice      = config.getString(s"$env.routes.auth-microservice")

@@ -18,7 +18,7 @@ package com.cjwwdev.auth.actions
 
 import com.cjwwdev.auth.connectors.AuthConnector
 import com.cjwwdev.auth.models.AuthContext
-import com.cjwwdev.logging.Logger
+import play.api.Logger
 import play.api.mvc.{Action, AnyContent, Call, Results}
 
 import scala.concurrent.ExecutionContext.Implicits.global
