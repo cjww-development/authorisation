@@ -13,9 +13,9 @@ scalaVersion := "2.11.11"
 organization := "com.cjww-dev.libs"
 
 val cjwwDep: Seq[ModuleID] = Seq(
-  "com.cjww-dev.libs" %% "http-verbs" % "1.9.0",
-  "com.cjww-dev.libs" %% "data-security" % "2.4.0",
-  "com.cjww-dev.libs" %% "application-utilities" % "1.0.0"
+  "com.cjww-dev.libs" %% "http-verbs" % "1.10.0",
+  "com.cjww-dev.libs" %% "data-security" % "2.5.0",
+  "com.cjww-dev.libs" %% "application-utilities" % "1.1.0"
 )
 val codeDep: Seq[ModuleID] = Seq("com.typesafe.play" % "play_2.11" % "2.5.15")
 val testDep: Seq[ModuleID] = Seq(
