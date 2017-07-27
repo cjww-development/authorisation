@@ -39,6 +39,7 @@ trait ActionWrappers extends Results {
       }
   }
 
+  @deprecated
   def withPotentialUser(userAction: Option[AuthContext] => Action[AnyContent]): Action[AnyContent] = Action.async {
     implicit request =>
       authConnector.getContext flatMap {

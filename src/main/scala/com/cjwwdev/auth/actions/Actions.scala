@@ -25,6 +25,7 @@ trait AuthenticatedAction {
   def async(body: (AuthContext => (Request[AnyContent]) => Future[Result])) : Action[AnyContent]
 }
 
+@deprecated
 trait UnauthenticatedAction {
   def async(body : (Option[AuthContext] => (Request[AnyContent]) => Future[Result])) : Action[AnyContent]
 }

@@ -58,6 +58,7 @@ trait Actions extends AuthActions with ActionWrappers {
     }
   }
 
+  @deprecated
   class Unauthenticated extends UnauthenticatedAction {
     def apply(body : OptionPlayUserRequest) : Action[AnyContent] = unauthorised(body)
     def async(body : OptionAsyncPlayUserRequest) : Action[AnyContent] = unauthorised(body)

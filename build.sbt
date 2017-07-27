@@ -7,20 +7,20 @@ val btVersion: String = Try(ConfigFactory.load.getString("version")) match {
 }
 
 
-name := "authorisation"
-version := btVersion
-scalaVersion := "2.11.11"
-organization := "com.cjww-dev.libs"
+name          := "authorisation"
+version       := btVersion
+scalaVersion  := "2.11.11"
+organization  := "com.cjww-dev.libs"
 
 val cjwwDep: Seq[ModuleID] = Seq(
-  "com.cjww-dev.libs" %% "http-verbs" % "1.10.0",
-  "com.cjww-dev.libs" %% "data-security" % "2.5.0",
-  "com.cjww-dev.libs" %% "application-utilities" % "1.1.0"
+  "com.cjww-dev.libs" %% "http-verbs"             % "2.0.0",
+  "com.cjww-dev.libs" %% "data-security"          % "2.5.0",
+  "com.cjww-dev.libs" %% "application-utilities"  % "1.1.0"
 )
 val codeDep: Seq[ModuleID] = Seq("com.typesafe.play" % "play_2.11" % "2.5.15")
 val testDep: Seq[ModuleID] = Seq(
-  "org.scalatestplus.play" % "scalatestplus-play_2.11" % "2.0.0",
-  "org.mockito" % "mockito-core" % "2.8.47"
+  "org.scalatestplus.play"  % "scalatestplus-play_2.11" % "2.0.0",
+  "org.mockito"             % "mockito-core"            % "2.8.47"
 )
 
 libraryDependencies ++= cjwwDep
@@ -29,8 +29,8 @@ libraryDependencies ++= testDep
 
 resolvers += "cjww-dev" at "http://dl.bintray.com/cjww-development/releases"
 
-bintrayOrganization := Some("cjww-development")
-bintrayReleaseOnPublish in ThisBuild := true
-bintrayRepository := "releases"
-bintrayOmitLicense := true
+bintrayOrganization                   := Some("cjww-development")
+bintrayReleaseOnPublish in ThisBuild  := true
+bintrayRepository                     := "releases"
+bintrayOmitLicense                    := true
     
