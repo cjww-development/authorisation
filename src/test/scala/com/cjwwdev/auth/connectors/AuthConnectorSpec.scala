@@ -17,15 +17,14 @@
 package com.cjwwdev.auth.connectors
 
 import com.cjwwdev.auth.models.{AuthContext, User}
+import com.cjwwdev.config.ConfigurationLoader
 import com.cjwwdev.http.exceptions.NotFoundException
 import com.cjwwdev.http.verbs.Http
-import com.cjwwdev.security.encryption.DataSecurity
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import org.mockito.Mockito._
 import org.mockito.ArgumentMatchers
-import play.api.libs.ws.WSResponse
 import play.api.test.FakeRequest
 
 import scala.concurrent.{Await, Future}
@@ -33,7 +32,8 @@ import scala.concurrent.duration._
 
 class AuthConnectorSpec extends PlaySpec with MockitoSugar with OneAppPerSuite {
 
-  val mockHttp = mock[Http]
+  val mockHttp   = mock[Http]
+  val mockConfig = mock[ConfigurationLoader]
 
   final val now = new DateTime(DateTimeZone.UTC)
 
@@ -54,7 +54,7 @@ class AuthConnectorSpec extends PlaySpec with MockitoSugar with OneAppPerSuite {
   )
 
   class Setup {
-    val testConnector = new AuthConnector(mockHttp)
+    val testConnector = new AuthConnector(mockHttp, mockConfig)
   }
 
   "getContext" should {

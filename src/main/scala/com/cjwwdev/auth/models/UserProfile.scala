@@ -20,6 +20,7 @@ import com.cjwwdev.json.JsonFormats
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
+@deprecated("Not used anymore", "7-9-17")
 case class UserProfile(firstName: String,
                        lastName: String,
                        userName: String,
