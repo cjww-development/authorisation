@@ -1,4 +1,4 @@
-// Copyright (C) 2016-2017 the original author or authors.
+// Copyright (C) 2011-2012 the original author or authors.
 // See the LICENCE.txt file distributed with this work for additional
 // information regarding copyright ownership.
 //
@@ -16,15 +16,33 @@
 
 package com.cjwwdev.auth.actions
 
+import com.cjwwdev.auth.connectors.AuthConnector
 import com.cjwwdev.auth.models.AuthContext
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.mvc._
 
 import scala.concurrent.Future
+import scala.language.implicitConversions
 
-trait AuthenticatedAction {
-  def async(body: (AuthContext => (Request[AnyContent]) => Future[Result])) : Action[AnyContent]
-}
+trait Actions extends ActionWrappers {
 
-trait UnauthenticatedAction {
-  def async(body : (Option[AuthContext] => (Request[AnyContent]) => Future[Result])) : Action[AnyContent]
+  val authConnector: AuthConnector
+
+  private type AsyncPlayRequest     = Request[AnyContent] => Future[Result]
+  private type AsyncPlayUserRequest = AuthContext => AsyncPlayRequest
+
+  type UserAction                   = AuthContext => Action[AnyContent]
+
+  implicit def makeFutureAction(body: AsyncPlayUserRequest): UserAction = (user: AuthContext) => Action.async(body(user))
+
+  def authorisedFor(loginCall: Call): AuthenticatedAction = new AuthenticatedBy(loginCall)
+
+  class AuthenticatedBy(loginCall: Call) extends AuthenticatedAction {
+    def async(body : AsyncPlayUserRequest): Action[AnyContent] = authorised(body)
+
+    private def authorised(body: UserAction) = {
+      withAuthenticatedUser(loginCall) {
+        implicit account => body(account)
+      }
+    }
+  }
 }

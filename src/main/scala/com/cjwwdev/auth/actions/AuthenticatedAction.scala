@@ -16,26 +16,12 @@
 
 package com.cjwwdev.auth.actions
 
-import com.cjwwdev.auth.connectors.AuthConnector
 import com.cjwwdev.auth.models.AuthContext
-import play.api.Logger
-import play.api.mvc.{Action, AnyContent, Call, Results}
+import play.api.mvc.{Action, AnyContent, Request, Result}
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-trait ActionWrappers extends Results {
-
-  val authConnector: AuthConnector
-
-  def withAuthenticatedUser(call : Call)(userAction: AuthContext => Action[AnyContent]): Action[AnyContent] = Action.async {
-    implicit request =>
-      authConnector.getContext flatMap {
-        case Some(context) =>
-          Logger.info(s"Authenticated as ${context.user.id} on ${request.path}")
-          userAction(context)(request)
-        case _ =>
-          Logger.warn(s"Unauthenticated user attempting to access ${request.path}; redirecting to login")
-          Action(Redirect(call))(request)
-      }
-  }
+trait AuthenticatedAction {
+  def async(body: (AuthContext => (Request[AnyContent]) => Future[Result])) : Action[AnyContent]
 }
+

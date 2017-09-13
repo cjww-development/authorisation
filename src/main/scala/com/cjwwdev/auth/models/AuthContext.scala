@@ -22,7 +22,7 @@ import play.api.data.validation.ValidationError
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
-case class User(userId: String,
+case class User(id: String,
                 firstName: Option[String],
                 lastName: Option[String],
                 orgName: Option[String],
@@ -31,26 +31,26 @@ case class User(userId: String,
 
 object User extends JsonFormats[User] {
   val reads: Reads[User] = (
-    (__ \ "userId").read[String] and
-      (__ \ "firstName").readNullable[String] and
-      (__ \ "lastName").readNullable[String] and
-      (__ \ "orgName").readNullable[String] and
-      (__ \ "credentialType").read[String] and
-      (__ \ "role").readNullable[String]
-    )(User.apply _).filterNot(ValidationError("Credential type was individual but either first and last name wasn't defined or org name was"))(
+    (__ \ "id").read[String] and
+    (__ \ "firstName").readNullable[String] and
+    (__ \ "lastName").readNullable[String] and
+    (__ \ "orgName").readNullable[String] and
+    (__ \ "credentialType").read[String] and
+    (__ \ "role").readNullable[String]
+  )(User.apply _).filterNot(ValidationError("Credential type was individual but either first and last name wasn't defined or org name was"))(
     user => user.credentialType == "individual" && (user.firstName.isEmpty || user.lastName.isEmpty || user.orgName.isDefined)
   ).filterNot(ValidationError("Credential type was organisation but either org name wasn't defined or first and last name was"))(
     user => user.credentialType == "organisation" && (user.orgName.isEmpty || user.firstName.isDefined || user.lastName.isDefined)
   )
 
   val writes: OWrites[User] = (
-    (__ \ "userId").write[String] and
-      (__ \ "firstName").writeNullable[String] and
-      (__ \ "lastName").writeNullable[String] and
-      (__ \ "orgName").writeNullable[String] and
-      (__ \ "credentialType").write[String] and
-      (__ \ "role").writeNullable[String]
-    )(unlift(User.unapply))
+    (__ \ "id").write[String] and
+    (__ \ "firstName").writeNullable[String] and
+    (__ \ "lastName").writeNullable[String] and
+    (__ \ "orgName").writeNullable[String] and
+    (__ \ "credentialType").write[String] and
+    (__ \ "role").writeNullable[String]
+  )(unlift(User.unapply))
 
   override implicit val standardFormat: OFormat[User] = OFormat(reads, writes)
 }
