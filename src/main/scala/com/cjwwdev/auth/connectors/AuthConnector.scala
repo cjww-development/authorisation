@@ -19,7 +19,7 @@ import javax.inject.{Inject, Singleton}
 
 import com.cjwwdev.auth.models.AuthContext
 import com.cjwwdev.config.ConfigurationLoader
-import com.cjwwdev.http.exceptions.NotFoundException
+import com.cjwwdev.http.exceptions.{ClientErrorException, NotFoundException}
 import com.cjwwdev.http.utils.SessionUtils
 import com.cjwwdev.http.verbs.Http
 import play.api.mvc.Request
@@ -35,7 +35,8 @@ class AuthConnector @Inject()(http: Http, config: ConfigurationLoader) extends S
     http.GET[AuthContext](s"$authMicroservice/get-context/$getContextId") map {
       resp => Some(resp)
     } recover {
-      case _: NotFoundException => None
+      case _: NotFoundException    => None
+      case _: ClientErrorException => None
     }
   }
 }
