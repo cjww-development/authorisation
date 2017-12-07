@@ -1,35 +1,31 @@
 import com.typesafe.config.ConfigFactory
 import scala.util.{Try, Success, Failure}
 
+val libraryName = "authorisation"
+
 val btVersion: String = Try(ConfigFactory.load.getString("version")) match {
   case Success(ver) => ver
   case Failure(_)   => "0.1.0"
 }
 
-name         := "authorisation"
-version      := btVersion
-scalaVersion := "2.11.11"
-organization := "com.cjww-dev.libs"
-
-val cjwwDep: Seq[ModuleID] = Seq(
-  "com.cjww-dev.libs" %% "http-verbs"             % "2.5.0",
-  "com.cjww-dev.libs" %% "data-security"          % "2.8.0",
-  "com.cjww-dev.libs" %% "application-utilities"  % "2.3.0"
-)
-val codeDep: Seq[ModuleID] = Seq("com.typesafe.play" % "play_2.11" % "2.5.16")
-val testDep: Seq[ModuleID] = Seq(
-  "org.scalatestplus.play" % "scalatestplus-play_2.11" % "2.0.1",
-  "org.mockito"            % "mockito-core"            % "2.10.0"
+val dependencies: Seq[ModuleID] = Seq(
+  "com.cjww-dev.libs"      %% "http-verbs"              % "2.9.0",
+  "com.cjww-dev.libs"      %% "data-security"           % "2.10.0",
+  "com.cjww-dev.libs"      %% "application-utilities"   % "2.8.0",
+  "com.typesafe.play"      %  "play_2.11"               % "2.5.16",
+  "org.scalatestplus.play" % "scalatestplus-play_2.11"  % "2.0.1"  % Test,
+  "com.github.tomakehurst" % "wiremock"                 % "2.8.0"  % Test
 )
 
-libraryDependencies ++= cjwwDep
-libraryDependencies ++= codeDep
-libraryDependencies ++= testDep
-
-resolvers += "cjww-dev" at "http://dl.bintray.com/cjww-development/releases"
-
-bintrayOrganization                  := Some("cjww-development")
-bintrayReleaseOnPublish in ThisBuild := true
-bintrayRepository                    := "releases"
-bintrayOmitLicense                   := true
-    
+lazy val library = Project(libraryName, file("."))
+  .settings(
+    version                              :=  btVersion,
+    scalaVersion                         :=  "2.11.12",
+    organization                         :=  "com.cjww-dev.libs",
+    resolvers                            +=  "cjww-dev" at "http://dl.bintray.com/cjww-development/releases",
+    libraryDependencies                  ++= dependencies,
+    bintrayOrganization                  :=  Some("cjww-development"),
+    bintrayReleaseOnPublish in ThisBuild :=  true,
+    bintrayRepository                    :=  "releases",
+    bintrayOmitLicense                   :=  true
+  )

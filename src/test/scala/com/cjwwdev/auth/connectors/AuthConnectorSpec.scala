@@ -16,24 +16,24 @@
 
 package com.cjwwdev.auth.connectors
 
+import com.cjwwdev.auth.helpers.WireMockHelper
 import com.cjwwdev.auth.models.{AuthContext, User}
-import com.cjwwdev.config.ConfigurationLoader
+import com.cjwwdev.config.{ConfigurationLoader, ConfigurationLoaderImpl}
 import com.cjwwdev.http.exceptions.NotFoundException
-import com.cjwwdev.http.verbs.Http
+import com.cjwwdev.http.verbs.{Http, HttpImpl}
+import com.cjwwdev.security.encryption.DataSecurity
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
-import org.mockito.Mockito._
-import org.mockito.ArgumentMatchers
+import play.api.libs.json.{JsValue, Json}
+import play.api.libs.ws.WSClient
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 
-class AuthConnectorSpec extends PlaySpec with MockitoSugar with OneAppPerSuite {
-
-  val mockHttp   = mock[Http]
-  val mockConfig = mock[ConfigurationLoader]
+class AuthConnectorSpec extends WireMockHelper {
 
   final val now = new DateTime(DateTimeZone.UTC)
 
@@ -53,26 +53,30 @@ class AuthConnectorSpec extends PlaySpec with MockitoSugar with OneAppPerSuite {
     now
   )
 
-  class Setup {
-    val testConnector = new AuthConnector(mockHttp, mockConfig)
-  }
+  val config   = app.injector.instanceOf(classOf[ConfigurationLoaderImpl])
+  val wsClient = app.injector.instanceOf(classOf[WSClient])
+  val http     = new HttpImpl(wsClient, config)
+
+  val testConnector = new AuthConnectorImpl(http, config)
 
   "getContext" should {
-    "return an auth context" in new Setup {
+    "return an auth context" in {
       implicit val request = FakeRequest().withSession("contextId" -> "testCID")
 
-      when(mockHttp.GET[AuthContext](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.successful(testContext))
+      wmGet("/session-store/session/invalid-cookie/context", OK, DataSecurity.encryptType[JsValue](Json.parse("""{"contextId"  : "testContextId"}""")))
+
+      wmGet("/auth/get-context/testContextId", OK, DataSecurity.encryptType[AuthContext](testContext))
 
       val result = Await.result(testConnector.getContext, 5.seconds)
       result mustBe Some(testContext)
     }
 
-    "return none" in new Setup {
+    "return none" in {
       implicit val request = FakeRequest().withSession("contextId" -> "testCID")
 
-      when(mockHttp.GET[AuthContext](ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.any()))
-        .thenReturn(Future.failed(new NotFoundException("test message")))
+      wmGet("/session-store/session/invalid-cookie/context", OK, DataSecurity.encryptType[JsValue](Json.parse("""{"contextId"  : "testContextId"}""")))
+
+      wmGet("/auth/get-context/testContextId", NOT_FOUND, "")
 
       val result = Await.result(testConnector.getContext, 5.seconds)
       result mustBe None

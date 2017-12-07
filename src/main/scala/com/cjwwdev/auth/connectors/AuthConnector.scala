@@ -15,28 +15,39 @@
 // limitations under the License.
 package com.cjwwdev.auth.connectors
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
 import com.cjwwdev.auth.models.AuthContext
 import com.cjwwdev.config.ConfigurationLoader
 import com.cjwwdev.http.exceptions.{ClientErrorException, NotFoundException}
 import com.cjwwdev.http.utils.SessionUtils
 import com.cjwwdev.http.verbs.Http
+import play.api.libs.json.JsValue
 import play.api.mvc.Request
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-@Singleton
-class AuthConnector @Inject()(http: Http, config: ConfigurationLoader) extends SessionUtils {
-  private val authMicroservice = config.buildServiceUrl("auth-microservice")
+class AuthConnectorImpl @Inject()(val http: Http, config: ConfigurationLoader) extends AuthConnector {
+  val authMicroservice = config.buildServiceUrl("auth-microservice")
+  val sessionStore     = config.buildServiceUrl("session-store")
+}
+
+trait AuthConnector extends SessionUtils {
+  val http: Http
+
+  val authMicroservice: String
+  val sessionStore: String
 
   def getContext(implicit request: Request[_]): Future[Option[AuthContext]] = {
-    http.GET[AuthContext](s"$authMicroservice/get-context/$getContextId") map {
-      resp => Some(resp)
-    } recover {
-      case _: NotFoundException    => None
-      case _: ClientErrorException => None
+    http.GET[JsValue](s"$sessionStore/session/$getCookieId/context") flatMap { response =>
+      val contextId = response.\("contextId").as[String]
+      http.GET[AuthContext](s"$authMicroservice/get-context/$contextId") map {
+        Some(_)
+      } recover {
+        case _: NotFoundException    => None
+        case _: ClientErrorException => None
+      }
     }
   }
 }
