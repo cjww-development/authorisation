@@ -28,9 +28,9 @@ import play.api.mvc.Request
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class AuthConnectorImpl @Inject()(val http: Http, config: ConfigurationLoader) extends AuthConnector {
-  val authMicroservice = config.buildServiceUrl("auth-microservice")
-  val sessionStore     = config.buildServiceUrl("session-store")
+class AuthConnectorImpl @Inject()(val http: Http) extends AuthConnector with ConfigurationLoader {
+  val authMicroservice = buildServiceUrl("auth-microservice")
+  val sessionStore     = buildServiceUrl("session-store")
 }
 
 trait AuthConnector extends SessionUtils {
