@@ -22,6 +22,7 @@ import com.cjwwdev.config.ConfigurationLoader
 import com.cjwwdev.http.exceptions.{ClientErrorException, NotFoundException}
 import com.cjwwdev.http.utils.SessionUtils
 import com.cjwwdev.http.verbs.Http
+import com.cjwwdev.security.encryption.DataSecurity
 import play.api.libs.json.JsValue
 import play.api.mvc.Request
 
@@ -41,7 +42,7 @@ trait AuthConnector extends SessionUtils {
 
   def getContext(implicit request: Request[_]): Future[Option[AuthContext]] = {
     http.GET[JsValue](s"$sessionStore/session/$getCookieId/context") flatMap { response =>
-      val contextId = response.\("contextId").as[String]
+      val contextId = DataSecurity.decryptString(response.\("contextId").as[String])
       http.GET[AuthContext](s"$authMicroservice/get-context/$contextId") map {
         Some(_)
       } recover {
