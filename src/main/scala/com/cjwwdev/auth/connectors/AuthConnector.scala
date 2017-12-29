@@ -29,9 +29,9 @@ import play.api.mvc.Request
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class AuthConnectorImpl @Inject()(val http: Http) extends AuthConnector with ConfigurationLoader {
-  val authMicroservice = buildServiceUrl("auth-microservice")
-  val sessionStore     = buildServiceUrl("session-store")
+class AuthConnectorImpl @Inject()(val http: Http, val configurationLoader: ConfigurationLoader) extends AuthConnector {
+  val authMicroservice = configurationLoader.buildServiceUrl("auth-microservice")
+  val sessionStore     = configurationLoader.buildServiceUrl("session-store")
 }
 
 trait AuthConnector extends SessionUtils {
@@ -41,13 +41,16 @@ trait AuthConnector extends SessionUtils {
   val sessionStore: String
 
   def getContext(implicit request: Request[_]): Future[Option[AuthContext]] = {
-    http.GET[JsValue](s"$sessionStore/session/$getCookieId/context") flatMap { response =>
-      val contextId = DataSecurity.decryptString(response.\("contextId").as[String])
-      http.GET[AuthContext](s"$authMicroservice/get-context/$contextId") map {
-        Some(_)
-      } recover {
-        case _: NotFoundException    => None
-        case _: ClientErrorException => None
+    getCookieId match {
+      case "invalid-cookie" => Future.successful(None)
+      case id @ _ => http.GET[JsValue](s"$sessionStore/session/$id/context") flatMap { response =>
+        val contextId = DataSecurity.decryptString(response.\("contextId").as[String])
+        http.GET[AuthContext](s"$authMicroservice/get-context/$contextId") map {
+          Some(_)
+        } recover {
+          case _: NotFoundException    => None
+          case _: ClientErrorException => None
+        }
       }
     }
   }

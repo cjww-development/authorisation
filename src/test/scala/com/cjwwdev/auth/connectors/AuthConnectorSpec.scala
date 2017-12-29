@@ -18,10 +18,12 @@ package com.cjwwdev.auth.connectors
 
 import com.cjwwdev.auth.helpers.WireMockHelper
 import com.cjwwdev.auth.models.{AuthContext, User}
+import com.cjwwdev.config.ConfigurationLoaderImpl
 import com.cjwwdev.http.verbs.HttpImpl
 import com.cjwwdev.security.encryption.DataSecurity
 import org.joda.time.{DateTime, DateTimeZone}
 import play.api.libs.json.{JsValue, Json}
+import play.api.libs.ws.WSClient
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
@@ -48,31 +50,33 @@ class AuthConnectorSpec extends WireMockHelper {
     now
   )
 
-//  val http     = app.injector.instanceOf(classOf[HttpImpl])
-//
-//  val testConnector = new AuthConnectorImpl(http)
+  val ws       = app.injector.instanceOf(classOf[WSClient])
+  val config   = app.injector.instanceOf(classOf[ConfigurationLoaderImpl])
+  val http     = new HttpImpl(ws, config)
 
-//  "getContext" should {
-////    "return an auth context" ignore {
-////      implicit val request = FakeRequest().withSession("contextId" -> "testCID")
-////
-////      wmGet("/session-store/session/invalid-cookie/context", OK, DataSecurity.encryptType[JsValue](Json.parse("""{"contextId"  : "testContextId"}""")))
-////
-////      wmGet("/auth/get-context/testContextId", OK, DataSecurity.encryptType[AuthContext](testContext))
-////
-////      val result = Await.result(testConnector.getContext, 5.seconds)
-////      result mustBe Some(testContext)
-////    }
-////
-////    "return none" ignore {
-////      implicit val request = FakeRequest().withSession("contextId" -> "testCID")
-////
-////      wmGet("/session-store/session/invalid-cookie/context", OK, DataSecurity.encryptType[JsValue](Json.parse("""{"contextId"  : "testContextId"}""")))
-////
-////      wmGet("/auth/get-context/testContextId", NOT_FOUND, "")
-////
-////      val result = Await.result(testConnector.getContext, 5.seconds)
-////      result mustBe None
-////    }
-//  }
+  val testConnector = new AuthConnectorImpl(http, config)
+
+  "getContext" should {
+    "return an auth context" in {
+      implicit val request = FakeRequest().withSession("cookieId" -> "testSessionId")
+
+      wmGet("/session-store/session/testSessionId/context", OK, DataSecurity.encryptType[JsValue](Json.parse(s"""{"contextId"  : "${DataSecurity.encryptString("testContextId")}"}""")))
+
+      wmGet("/auth/get-context/testContextId", OK, DataSecurity.encryptType[AuthContext](testContext))
+
+      val result = Await.result(testConnector.getContext, 5.seconds)
+      result mustBe Some(testContext)
+    }
+
+    "return none" in {
+      implicit val request = FakeRequest().withSession("contextId" -> "testCID")
+
+      wmGet("/session-store/session/invalid-cookie/context", OK, DataSecurity.encryptType[JsValue](Json.parse("""{"contextId"  : "testContextId"}""")))
+
+      wmGet("/auth/get-context/testContextId", NOT_FOUND, "")
+
+      val result = Await.result(testConnector.getContext, 5.seconds)
+      result mustBe None
+    }
+  }
 }
