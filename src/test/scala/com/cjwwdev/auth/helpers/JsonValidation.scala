@@ -14,12 +14,22 @@
  *    limitations under the License.
  *
  */
+package com.cjwwdev.auth.helpers
 
-package com.cjwwdev.auth.actions
+import org.scalatestplus.play.PlaySpec
+import play.api.data.validation.ValidationError
+import play.api.libs.json.{JsError, JsPath, JsResult, JsSuccess}
 
-import play.api.mvc.{Action, AnyContent}
+trait JsonValidation {
+  this: PlaySpec =>
 
-trait AuthenticatedAction {
-  self: ActionAliases =>
-  def async(body: AsyncPlayUserRequest) : Action[AnyContent]
+  def shouldHaveErrors[T](result: JsResult[T], expectedErrors: Map[JsPath, Seq[ValidationError]]): Unit = {
+    result match {
+      case JsSuccess(data, _) => fail(s"read should have failed and didn't - produced $data")
+      case JsError(errors)    => for((path, valErrs) <- errors) {
+        expectedErrors.keySet must contain(path)
+        expectedErrors(path) mustBe valErrs
+      }
+    }
+  }
 }
