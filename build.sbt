@@ -1,17 +1,17 @@
 /*
- *   Copyright 2018 CJWW Development
+ * Copyright 2018 CJWW Development
  *
- *   Licensed under the Apache License, Version 2.0 (the "License");
- *   you may not use this file except in compliance with the License.
- *   You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *   Unless required by applicable law or agreed to in writing, software
- *   distributed under the License is distributed on an "AS IS" BASIS,
- *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
- *   limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import com.typesafe.config.ConfigFactory
@@ -25,13 +25,10 @@ val btVersion: String = Try(ConfigFactory.load.getString("version")) match {
 }
 
 val dependencies: Seq[ModuleID] = Seq(
-  "com.cjww-dev.libs"      %% "http-verbs"              % "2.15.0",
-  "com.cjww-dev.libs"      %% "data-security"           % "2.12.0",
-  "com.cjww-dev.libs"      %% "application-utilities"   % "2.14.0",
-  "com.typesafe.play"      %  "play_2.11"               % "2.5.16",
-  "org.scalatestplus.play" %  "scalatestplus-play_2.11" % "2.0.1"  % Test,
-  "com.github.tomakehurst" %  "wiremock"                % "2.8.0"  % Test,
-  "org.mockito"            %  "mockito-core"            % "2.13.0" % Test
+  "com.cjww-dev.libs" %% "http-verbs"            % "2.16.0",
+  "com.cjww-dev.libs" %% "application-utilities" % "3.0.0",
+  "com.typesafe.play" %  "play_2.11"             % "2.5.16",
+  "com.cjww-dev.libs" %% "testing-framework"     % "2.1.0"   % Test
 )
 
 lazy val library = Project(libraryName, file("."))
@@ -47,8 +44,8 @@ lazy val library = Project(libraryName, file("."))
     bintrayOmitLicense                   :=  true,
     fork                    in Test      :=  true,
     javaOptions             in Test      :=  Seq(
-      "-Dmicroservice.data-security.key=testKey",
-      "-Dmicroservice.data-security.salt=testSalt",
+      "-Ddata-security.key=testKey",
+      "-Ddata-security.salt=testSalt",
       "-Dmicroservice.external-services.deversity-frontend.application-id=testDevFEId",
       "-Dmicroservice.external-services.deversity.application-id=testDevId",
       "-Dmicroservice.external-services.diagnostics-frontend.application-id=testDiagFEId",
