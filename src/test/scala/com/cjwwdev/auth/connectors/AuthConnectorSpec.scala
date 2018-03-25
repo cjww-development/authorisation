@@ -26,6 +26,7 @@ import com.cjwwdev.testing.unit.application.FakeAppPerTest
 import org.joda.time.{DateTime, DateTimeZone}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
+import play.api.libs.json.Json
 import play.api.test.FakeRequest
 
 import scala.concurrent.duration._
@@ -55,6 +56,9 @@ class AuthConnectorSpec extends UnitTestSpec with MockHttpResponse with FakeAppP
     override val sessionStore     = "/test/session-store"
   }
 
+  case class Context(contextId: String, other: Option[String] = None)
+  implicit val format = Json.format[Context]
+
   "getCurrentUser" should {
     "return an auth context" in {
       implicit val request = FakeRequest().withSession("cookieId" -> "testSessionId")
@@ -64,7 +68,7 @@ class AuthConnectorSpec extends UnitTestSpec with MockHttpResponse with FakeAppP
 
       when(mockHttp.get(ArgumentMatchers.any())(ArgumentMatchers.eq(request)))
         .thenReturn(
-          Future.successful(mockWSResponseWithString(200, "testContextId")),
+          Future.successful(mockWSResponseWithString(200, Context("testContextId").encryptType)),
           Future.successful(mockWSResponse[CurrentUser](200, testUser))
         )
 
@@ -81,7 +85,7 @@ class AuthConnectorSpec extends UnitTestSpec with MockHttpResponse with FakeAppP
 
         when(mockHttp.get(ArgumentMatchers.any())(ArgumentMatchers.eq(request)))
           .thenReturn(
-            Future.successful(mockWSResponseWithString(200, "testContextId")),
+            Future.successful(mockWSResponseWithString(200, Context("testContextId").encryptType)),
             Future.failed(new NotFoundException("test message"))
           )
 

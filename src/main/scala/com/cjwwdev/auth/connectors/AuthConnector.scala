@@ -16,12 +16,12 @@
 package com.cjwwdev.auth.connectors
 
 import javax.inject.Inject
-
 import com.cjwwdev.auth.models.CurrentUser
 import com.cjwwdev.config.ConfigurationLoader
 import com.cjwwdev.http.exceptions.NotFoundException
 import com.cjwwdev.http.verbs.Http
 import com.cjwwdev.implicits.ImplicitHandlers
+import play.api.libs.json.JsValue
 import play.api.mvc.Request
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -41,7 +41,7 @@ trait AuthConnector extends ImplicitHandlers {
   def getCurrentUser(implicit request: Request[_]): Future[Option[CurrentUser]] = {
     http.constructHeaderPackageFromRequestHeaders.fold(Future.successful(Option.empty[CurrentUser]))(headers =>
       http.get(s"$sessionStore/session/${headers.cookieId}/context") flatMap { sessionResp =>
-        val contextId = sessionResp.body.decrypt
+        val contextId = sessionResp.body.decryptType[JsValue].\("contextId").as[String]
         http.get(s"$authMicroservice/get-current-user/$contextId") map { contextResp =>
           Some(contextResp.body.decryptType[CurrentUser])
         } recover {

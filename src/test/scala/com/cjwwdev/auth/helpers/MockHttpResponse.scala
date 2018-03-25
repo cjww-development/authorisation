@@ -38,7 +38,7 @@ trait MockHttpResponse extends ImplicitHandlers {
   def mockWSResponseWithString(statusCode: Int, bodyInput: String): WSResponse = new WSResponse {
     override def cookie(name: String) = ???
     override def underlying[T]        = ???
-    override def body                 = bodyInput.encrypt
+    override def body                 = bodyInput
     override def bodyAsBytes          = ???
     override def cookies              = ???
     override def allHeaders           = ???
