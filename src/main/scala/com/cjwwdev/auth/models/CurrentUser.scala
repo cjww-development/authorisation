@@ -21,19 +21,36 @@ import play.api.libs.functional.syntax._
 
 case class CurrentUser(contextId: String,
                        id: String,
-                       orgDeversityId: Option[String],
                        credentialType: String,
+                       orgDeversityId: Option[String],
                        orgName: Option[String],
+                       firstName: Option[String],
+                       lastName: Option[String],
                        role: Option[String],
                        enrolments: Option[JsObject])
+
+/*
+*
+* contextId
+* id (userId)
+* credentialType (individual / organisation)
+* orgDeversityId (orgOnly)
+* orgName (orgOnly)
+* firstName (individualOnly)
+* lastName (individualOnly)
+* role (individualOnly)
+* enrolments (individualOnly)
+*/
 
 object CurrentUser {
   implicit val standardFormat: OFormat[CurrentUser] = (
     (__ \ "contextId").format[String] and
     (__ \ "id").format[String] and
-    (__ \ "orgDeversityId").formatNullable[String] and
     (__ \ "credentialType").format[String] and
+    (__ \ "orgDeversityId").formatNullable[String] and
     (__ \ "orgName").formatNullable[String] and
+    (__ \ "firstName").formatNullable[String] and
+    (__ \ "lastName").formatNullable[String] and
     (__ \ "role").formatNullable[String] and
     (__ \ "enrolments").formatNullable[JsObject]
   )(CurrentUser.apply, unlift(CurrentUser.unapply))

@@ -41,9 +41,11 @@ class AuthorisedActionSpec extends UnitTestSpec {
   val testUser = CurrentUser(
     contextId      = "testContextId",
     id             = "testUserId",
-    orgDeversityId = Some("testOrgDevId"),
     credentialType = "testTyoe",
+    orgDeversityId = Some("testOrgDevId"),
     orgName        = None,
+    firstName      = None,
+    lastName       = None,
     role           = None,
     enrolments     = None
   )
