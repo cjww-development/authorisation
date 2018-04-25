@@ -21,12 +21,13 @@ import com.cjwwdev.auth.models.CurrentUser
 import com.cjwwdev.http.exceptions.NotFoundException
 import com.cjwwdev.http.headers.HeaderPackage
 import com.cjwwdev.http.verbs.Http
+import com.cjwwdev.security.encryption.DataSecurity
 import com.cjwwdev.testing.unit.UnitTestSpec
 import com.cjwwdev.testing.unit.application.FakeAppPerTest
-import org.joda.time.{DateTime, DateTimeZone}
+import org.joda.time.{DateTime, DateTimeZone, LocalDateTime}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, JsString, JsValue, Json}
 import play.api.test.FakeRequest
 
 import scala.concurrent.duration._
@@ -51,10 +52,25 @@ class AuthConnectorSpec extends UnitTestSpec with MockHttpResponse with FakeAppP
   val mockHttp = mock[Http]
 
   val testConnector = new AuthConnector {
-    override val http             = mockHttp
-    override val authMicroservice = "/test/auth-microservice"
-    override val sessionStore     = "/test/session-store"
+    override val http                                       = mockHttp
+    override def authUrl: String                            = "/test/auth-microservice"
+    override def authUri(cookieId: String)                  = "/test"
+    override def sessionStoreUrl: String                    = "/test/session-store"
+    override def sessionStoreUri(contextId: String): String = "/test"
   }
+
+  val testSessionId = DataSecurity.encryptString("testSessionId")
+
+  def testApiResponse(statusCode: Int, json: JsValue): JsObject = Json.obj(
+    "uri"       -> "/test/uri",
+    "method"    -> "GET",
+    "status"    -> statusCode,
+    "sessionId" -> "testSessionId",
+    "body"      -> json,
+    "stats"     -> Json.obj(
+      "requestCompletedAt" -> s"${LocalDateTime.now}"
+    )
+  )
 
   case class Context(contextId: String, other: Option[String] = None)
   implicit val format = Json.format[Context]
@@ -68,8 +84,8 @@ class AuthConnectorSpec extends UnitTestSpec with MockHttpResponse with FakeAppP
 
       when(mockHttp.get(ArgumentMatchers.any())(ArgumentMatchers.eq(request)))
         .thenReturn(
-          Future.successful(mockWSResponseWithString(200, Context("testContextId").encryptType)),
-          Future.successful(mockWSResponse[CurrentUser](200, testUser))
+          Future(mockWSResponse(OK, testApiResponse(OK, JsString(testSessionId.encrypt)))),
+          Future(mockWSResponse(OK, testApiResponse(OK, JsString(testUser.encryptType))))
         )
 
       val result = Await.result(testConnector.getCurrentUser, 5.seconds)
@@ -85,7 +101,7 @@ class AuthConnectorSpec extends UnitTestSpec with MockHttpResponse with FakeAppP
 
         when(mockHttp.get(ArgumentMatchers.any())(ArgumentMatchers.eq(request)))
           .thenReturn(
-            Future.successful(mockWSResponseWithString(200, Context("testContextId").encryptType)),
+            Future(mockWSResponse(OK, testApiResponse(OK, JsString(Context("testContextId").encryptType)))),
             Future.failed(new NotFoundException("test message"))
           )
 
