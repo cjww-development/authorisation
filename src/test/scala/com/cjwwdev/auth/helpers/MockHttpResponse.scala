@@ -17,34 +17,20 @@
 package com.cjwwdev.auth.helpers
 
 import com.cjwwdev.implicits.ImplicitHandlers
-import play.api.libs.json.OWrites
+import play.api.libs.json.JsValue
 import play.api.libs.ws.WSResponse
 
 trait MockHttpResponse extends ImplicitHandlers {
-  def mockWSResponse[T](statusCode: Int, bodyInput: T)(implicit writes: OWrites[T]): WSResponse = new WSResponse {
+  def mockWSResponse(statusCode: Int, bodyInput: JsValue): WSResponse = new WSResponse {
     override def cookie(name: String) = ???
     override def underlying[T]        = ???
-    override def body                 = bodyInput.encryptType
+    override def body                  = ???
     override def bodyAsBytes          = ???
     override def cookies              = ???
     override def allHeaders           = ???
     override def xml                  = ???
     override def statusText           = ???
-    override def json                 = ???
-    override def header(key: String)  = ???
-    override def status               = statusCode
-  }
-
-  def mockWSResponseWithString(statusCode: Int, bodyInput: String): WSResponse = new WSResponse {
-    override def cookie(name: String) = ???
-    override def underlying[T]        = ???
-    override def body                 = bodyInput
-    override def bodyAsBytes          = ???
-    override def cookies              = ???
-    override def allHeaders           = ???
-    override def xml                  = ???
-    override def statusText           = ???
-    override def json                 = ???
+    override def json = bodyInput
     override def header(key: String)  = ???
     override def status               = statusCode
   }

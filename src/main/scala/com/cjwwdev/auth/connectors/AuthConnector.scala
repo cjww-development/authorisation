@@ -19,35 +19,53 @@ import javax.inject.Inject
 import com.cjwwdev.auth.models.CurrentUser
 import com.cjwwdev.config.ConfigurationLoader
 import com.cjwwdev.http.exceptions.NotFoundException
+import com.cjwwdev.http.responses.WsResponseHelpers
 import com.cjwwdev.http.verbs.Http
 import com.cjwwdev.implicits.ImplicitHandlers
-import play.api.libs.json.JsValue
 import play.api.mvc.Request
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class AuthConnectorImpl @Inject()(val http: Http, val configurationLoader: ConfigurationLoader) extends AuthConnector {
-  val authMicroservice = configurationLoader.buildServiceUrl("auth-microservice")
-  val sessionStore     = configurationLoader.buildServiceUrl("session-store")
+  val authUrl = configurationLoader.buildServiceUrl("auth-microservice")
+  def authUri(cookieId: String): String = {
+    configurationLoader
+      .loadedConfig
+      .underlying
+      .getString("microservice.external-services.auth-microservice.uri")
+      .replace(":sessionId", cookieId)
+  }
+
+  val sessionStoreUrl = configurationLoader.buildServiceUrl("session-store")
+  def sessionStoreUri(contextId: String): String = {
+    configurationLoader
+      .loadedConfig
+      .underlying
+      .getString(s"microservice.external-services.session-store.uri")
+      .replace(":contextId", contextId)
+  }
 }
 
-trait AuthConnector extends ImplicitHandlers {
+trait AuthConnector extends ImplicitHandlers with WsResponseHelpers {
   val http: Http
 
-  val authMicroservice: String
-  val sessionStore: String
+  def authUrl: String
+  def authUri(cookieId: String): String
+
+  def sessionStoreUrl: String
+  def sessionStoreUri(contextId: String): String
 
   def getCurrentUser(implicit request: Request[_]): Future[Option[CurrentUser]] = {
-    http.constructHeaderPackageFromRequestHeaders.fold(Future.successful(Option.empty[CurrentUser]))(headers =>
-      http.get(s"$sessionStore/session/${headers.cookieId}/context") flatMap { sessionResp =>
-        val contextId = sessionResp.body.decryptType[JsValue].\("contextId").as[String]
-        http.get(s"$authMicroservice/get-current-user/$contextId") map { contextResp =>
-          Some(contextResp.body.decryptType[CurrentUser])
+    http.constructHeaderPackageFromRequestHeaders.fold(Future(Option.empty[CurrentUser])) { headers =>
+      http.get(s"$sessionStoreUrl${sessionStoreUri(headers.cookieId)}") flatMap { sessionResp =>
+        val cookieId = sessionResp.toResponseString(needsDecrypt = true)
+        http.get(s"$authUrl${authUri(cookieId)}") map { contextResp =>
+          Some(contextResp.toDataType[CurrentUser](needsDecrypt = true))
         } recover {
           case _: NotFoundException => None
         }
       }
-    )
+    }
   }
 }

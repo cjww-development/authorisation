@@ -25,8 +25,8 @@ val btVersion: String = Try(ConfigFactory.load.getString("version")) match {
 }
 
 val dependencies: Seq[ModuleID] = Seq(
-  "com.cjww-dev.libs" %% "http-verbs"            % "2.16.0",
-  "com.cjww-dev.libs" %% "application-utilities" % "3.0.0",
+  "com.cjww-dev.libs" %% "http-verbs"            % "2.18.0",
+  "com.cjww-dev.libs" %% "application-utilities" % "3.1.0",
   "com.typesafe.play" %  "play_2.11"             % "2.5.16",
   "com.cjww-dev.libs" %% "testing-framework"     % "2.1.0"   % Test
 )
