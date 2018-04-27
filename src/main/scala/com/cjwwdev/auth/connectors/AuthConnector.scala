@@ -21,7 +21,6 @@ import com.cjwwdev.config.ConfigurationLoader
 import com.cjwwdev.http.exceptions.NotFoundException
 import com.cjwwdev.http.responses.WsResponseHelpers
 import com.cjwwdev.http.verbs.Http
-import com.cjwwdev.implicits.ImplicitHandlers
 import play.api.mvc.Request
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -47,7 +46,7 @@ class AuthConnectorImpl @Inject()(val http: Http, val configurationLoader: Confi
   }
 }
 
-trait AuthConnector extends ImplicitHandlers with WsResponseHelpers {
+trait AuthConnector extends WsResponseHelpers {
   val http: Http
 
   def authUrl: String

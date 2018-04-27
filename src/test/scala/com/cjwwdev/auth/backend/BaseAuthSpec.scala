@@ -18,6 +18,7 @@ package com.cjwwdev.auth.backend
 
 import com.cjwwdev.http.headers.HeaderPackage
 import com.cjwwdev.testing.unit.UnitTestSpec
+import com.cjwwdev.implicits.ImplicitDataSecurity._
 import play.api.test.FakeRequest
 
 class BaseAuthSpec extends UnitTestSpec {

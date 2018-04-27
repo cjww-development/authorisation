@@ -22,6 +22,7 @@ import com.cjwwdev.http.exceptions.NotFoundException
 import com.cjwwdev.http.headers.HeaderPackage
 import com.cjwwdev.http.verbs.Http
 import com.cjwwdev.security.encryption.DataSecurity
+import com.cjwwdev.implicits.ImplicitDataSecurity._
 import com.cjwwdev.testing.unit.UnitTestSpec
 import com.cjwwdev.testing.unit.application.FakeAppPerTest
 import org.joda.time.{DateTime, DateTimeZone, LocalDateTime}

@@ -19,6 +19,7 @@ package com.cjwwdev.auth.backend
 import com.cjwwdev.auth.connectors.AuthConnector
 import com.cjwwdev.auth.models.CurrentUser
 import com.cjwwdev.http.headers.HeaderPackage
+import com.cjwwdev.implicits.ImplicitDataSecurity._
 import com.cjwwdev.testing.unit.UnitTestSpec
 import org.joda.time.{DateTime, DateTimeZone}
 import org.mockito.ArgumentMatchers
