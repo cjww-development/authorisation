@@ -18,20 +18,24 @@ package com.cjwwdev.auth.backend
 import com.cjwwdev.auth.connectors.AuthConnector
 import com.cjwwdev.auth.models.CurrentUser
 import com.cjwwdev.logging.Logging
+import com.cjwwdev.responses.ApiResponse
 import play.api.mvc.Results.Forbidden
+import play.api.http.Status.FORBIDDEN
 import play.api.mvc.{Request, Result}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait Authentication extends BaseAuth with Logging {
+trait Authentication extends BaseAuth with Logging with ApiResponse {
   val authConnector: AuthConnector
 
   protected def authenticated(id: String)(f: => Future[Result])(implicit request: Request[_]): Future[Result] = {
     authConnector.getCurrentUser flatMap { context =>
       mapToAuthResult(id, context) match {
         case Authenticated  => f
-        case _              => Future.successful(Forbidden)
+        case _              => withFutureJsonResponseBody(FORBIDDEN, "The user could not be authenticated") { json =>
+          Future(Forbidden(json))
+        }
       }
     }
   }

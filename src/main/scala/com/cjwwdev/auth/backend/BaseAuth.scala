@@ -18,18 +18,21 @@ package com.cjwwdev.auth.backend
 import com.cjwwdev.auth.models.CurrentUser
 import com.cjwwdev.http.headers.HttpHeaders
 import com.cjwwdev.logging.Logging
+import com.cjwwdev.responses.ApiResponse
 import com.typesafe.config.ConfigFactory
 import play.api.mvc.Results.Forbidden
+import play.api.http.Status.FORBIDDEN
 import play.api.mvc.{Request, Result}
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 sealed trait AuthorisationResult
 case class Authorised(currentUser: CurrentUser) extends AuthorisationResult
 case object Authenticated extends AuthorisationResult
 case object NotAuthorised extends AuthorisationResult
 
-trait BaseAuth extends HttpHeaders with Logging {
+trait BaseAuth extends HttpHeaders with Logging with ApiResponse {
   private val config                   = ConfigFactory.load
   private def service(service: String) = s"microservice.external-services.$service.application-id"
 
@@ -56,7 +59,9 @@ trait BaseAuth extends HttpHeaders with Logging {
   protected def applicationVerification(f: => Future[Result])(implicit request: Request[_]): Future[Result] = {
     validateAppId match {
       case Authenticated  => f
-      case _              => Future.successful(Forbidden)
+      case _              => withFutureJsonResponseBody(FORBIDDEN, "The calling application could not be verified") { json =>
+        Future(Forbidden(json))
+      }
     }
   }
 

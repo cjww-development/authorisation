@@ -16,11 +16,10 @@
 
 package com.cjwwdev.auth.helpers
 
-import com.cjwwdev.implicits.ImplicitHandlers
 import play.api.libs.json.JsValue
 import play.api.libs.ws.WSResponse
 
-trait MockHttpResponse extends ImplicitHandlers {
+trait MockHttpResponse {
   def mockWSResponse(statusCode: Int, bodyInput: JsValue): WSResponse = new WSResponse {
     override def cookie(name: String) = ???
     override def underlying[T]        = ???

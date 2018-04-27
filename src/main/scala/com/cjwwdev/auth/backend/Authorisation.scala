@@ -19,6 +19,7 @@ package com.cjwwdev.auth.backend
 import com.cjwwdev.auth.connectors.AuthConnector
 import com.cjwwdev.auth.models.CurrentUser
 import play.api.mvc.Results.Forbidden
+import play.api.http.Status.FORBIDDEN
 import play.api.mvc.{Request, Result}
 
 import scala.concurrent.Future
@@ -31,7 +32,9 @@ trait Authorisation extends BaseAuth {
     authConnector.getCurrentUser flatMap { context =>
       mapToAuthResult(id, context) match {
         case Authorised(ac) => f(ac)
-        case _              => Future.successful(Forbidden)
+        case _              => withFutureJsonResponseBody(FORBIDDEN, "The user is not authorised to access this resource") { json =>
+          Future(Forbidden(json))
+        }
       }
     }
   }
