@@ -22,9 +22,10 @@ import com.cjwwdev.testing.unit.UnitTestSpec
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.libs.json.Json
-import play.api.mvc.{Call, Result}
+import play.api.mvc.{Call, ControllerComponents, Result}
 import play.api.mvc.Results.{NotFound, Ok}
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
 
 import scala.concurrent.Future
 
@@ -34,6 +35,7 @@ class AuthorisedActionSpec extends UnitTestSpec {
   val testLoginRedirect = Call("GET", "/")
 
   val testAuthAction = new AuthorisedAction {
+    override val components           = stubControllerComponents()
     override def unauthorisedRedirect = testLoginRedirect
     override def authConnector        = mockAuthConnector
   }

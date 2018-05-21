@@ -17,10 +17,11 @@
 package com.cjwwdev.auth.modules
 
 import com.cjwwdev.auth.connectors.{AuthConnector, AuthConnectorImpl}
-import com.google.inject.AbstractModule
+import play.api.{Configuration, Environment}
+import play.api.inject.{Binding, Module}
 
-class AuthConnectorBinder extends AbstractModule {
-  override def configure(): Unit = {
-    bind(classOf[AuthConnector]).to(classOf[AuthConnectorImpl]).asEagerSingleton()
-  }
+class AuthConnectorBinder extends Module {
+  override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = Seq(
+    bind(classOf[AuthConnector]).to(classOf[AuthConnectorImpl]).eagerly()
+  )
 }

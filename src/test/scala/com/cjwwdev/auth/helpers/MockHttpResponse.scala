@@ -16,21 +16,25 @@
 
 package com.cjwwdev.auth.helpers
 
+import akka.stream.scaladsl.Source
+import akka.util.ByteString
 import play.api.libs.json.JsValue
 import play.api.libs.ws.WSResponse
 
 trait MockHttpResponse {
   def mockWSResponse(statusCode: Int, bodyInput: JsValue): WSResponse = new WSResponse {
-    override def cookie(name: String) = ???
-    override def underlying[T]        = ???
-    override def body                  = ???
-    override def bodyAsBytes          = ???
-    override def cookies              = ???
-    override def allHeaders           = ???
-    override def xml                  = ???
-    override def statusText           = ???
-    override def json = bodyInput
-    override def header(key: String)  = ???
-    override def status               = statusCode
+    override def headers: Map[String, Seq[String]]   = ???
+    override def bodyAsSource: Source[ByteString, _] = ???
+    override def cookie(name: String)                = ???
+    override def underlying[T]                       = ???
+    override def body                                = ???
+    override def bodyAsBytes                         = ???
+    override def cookies                             = ???
+    override def allHeaders                          = ???
+    override def xml                                 = ???
+    override def statusText                          = ???
+    override def json                                = bodyInput
+    override def header(key: String)                 = ???
+    override def status                              = statusCode
   }
 }

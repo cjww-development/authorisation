@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-addSbtPlugin("com.typesafe.sbt"   % "sbt-native-packager"   % "1.2.0")
-addSbtPlugin("com.typesafe.play"  % "sbt-plugin"            % "2.5.16")
-addSbtPlugin("me.lessis"          % "bintray-sbt"           % "0.3.0")
-addSbtPlugin("com.github.gseitz"  % "sbt-release"           % "1.0.3")
-addSbtPlugin("org.scoverage"      % "sbt-scoverage"         % "1.5.1")
-addSbtPlugin("org.scalastyle"    %% "scalastyle-sbt-plugin" % "1.0.0")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin"            % "2.6.13")
+addSbtPlugin("org.scoverage"     % "sbt-scoverage"         % "1.5.1")
+addSbtPlugin("org.scalastyle"   %% "scalastyle-sbt-plugin" % "1.0.0")
+addSbtPlugin("com.typesafe.sbt"  % "sbt-native-packager"   % "1.3.4")
+addSbtPlugin("org.foundweekends" % "sbt-bintray"           % "0.5.4")
