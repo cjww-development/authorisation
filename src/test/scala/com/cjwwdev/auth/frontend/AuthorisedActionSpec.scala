@@ -35,7 +35,7 @@ class AuthorisedActionSpec extends UnitTestSpec {
   val testLoginRedirect = Call("GET", "/")
 
   val testAuthAction = new AuthorisedAction {
-    override val components           = stubControllerComponents()
+    override val controllerComponents = stubControllerComponents()
     override def unauthorisedRedirect = testLoginRedirect
     override def authConnector        = mockAuthConnector
   }
