@@ -27,9 +27,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 trait AuthorisedAction extends Results with Logging {
   private type AuthorisedAction = Request[AnyContent] => CurrentUser => Future[Result]
 
-  val components: ControllerComponents
+  val controllerComponents: ControllerComponents
 
-  private def action: ActionBuilder[Request, AnyContent] = components.actionBuilder
+  private def action: ActionBuilder[Request, AnyContent] = controllerComponents.actionBuilder
 
   protected def authConnector: AuthConnector
   protected def unauthorisedRedirect: Call
