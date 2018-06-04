@@ -110,6 +110,32 @@ class AuthConnectorSpec extends UnitTestSpec with MockHttpResponse with FakeAppP
         result mustBe None
       }
 
+      "no matching Session was found, but a sessionId was pulled from the header" in {
+        implicit val request = FakeRequest()
+
+        when(mockHttp.constructHeaderPackageFromRequestHeaders(ArgumentMatchers.eq(request)))
+          .thenReturn(Some(HeaderPackage("testSessionStoreId", "testSessionId")))
+
+        when(mockHttp.get(ArgumentMatchers.any())(ArgumentMatchers.eq(request)))
+          .thenReturn(Future.failed(new NotFoundException("test message")))
+
+        val result = Await.result(testConnector.getCurrentUser, 5.seconds)
+        result mustBe None
+      }
+
+      "no matching Session was found" in {
+        implicit val request = FakeRequest()
+
+        when(mockHttp.constructHeaderPackageFromRequestHeaders(ArgumentMatchers.eq(request)))
+          .thenReturn(Some(HeaderPackage("testSessionStoreId", "")))
+
+        when(mockHttp.get(ArgumentMatchers.any())(ArgumentMatchers.eq(request)))
+          .thenReturn(Future.failed(new NotFoundException("test message")))
+
+        val result = Await.result(testConnector.getCurrentUser, 5.seconds)
+        result mustBe None
+      }
+
       "no HeaderPackage was found in the request" in {
         implicit val request = FakeRequest().withSession("contextId" -> "testCID")
 

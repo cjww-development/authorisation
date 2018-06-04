@@ -64,6 +64,8 @@ trait AuthConnector extends WsResponseHelpers {
         } recover {
           case _: NotFoundException => None
         }
+      } recover {
+        case _: NotFoundException => None
       }
     }
   }
