@@ -46,13 +46,6 @@ lazy val library = Project(libraryName, file("."))
     javaOptions             in Test      :=  Seq(
       "-Ddata-security.key=testKey",
       "-Ddata-security.salt=testSalt",
-      "-Dmicroservice.external-services.deversity-frontend.application-id=testDevFEId",
-      "-Dmicroservice.external-services.deversity.application-id=testDevId",
-      "-Dmicroservice.external-services.diagnostics-frontend.application-id=testDiagFEId",
-      "-Dmicroservice.external-services.hub-frontend.application-id=testHubFEId",
-      "-Dmicroservice.external-services.auth-service.application-id=testAuthFEId",
-      "-Dmicroservice.external-services.auth-microservice.application-id=testAuthBeId",
-      "-Dmicroservice.external-services.accounts-microservice.application-id=testAccBeId",
-      "-Dmicroservice.external-services.session-store.application-id=testSessionStoreId"
+      "-Dmicroservice.allowedApps=M0VbBTxNa0CoJXhZMlcPpjD5iPpLluq88muJVq2nhKdQ-519MpWt1vTeZmMYCUk4Ewfx2_XXY27txe0Om2kSYHr4ZBq246ngTlhPhWQIIHNNTNAF7MHOKbxxxF-gHbT-W9Q4kf6efdmRpgD6AJB-Mg"
     )
   )

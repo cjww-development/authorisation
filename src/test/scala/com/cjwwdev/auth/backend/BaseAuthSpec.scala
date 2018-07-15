@@ -24,7 +24,7 @@ import play.api.test.FakeRequest
 class BaseAuthSpec extends UnitTestSpec {
 
   class Setup extends BaseAuth
-
+  
   "validateAppId" should {
     "return NotAuthorised" when {
       "No appId is found in the request headers" in new Setup {
