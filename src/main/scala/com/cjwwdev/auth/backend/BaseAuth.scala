@@ -19,6 +19,7 @@ import com.cjwwdev.auth.models.CurrentUser
 import com.cjwwdev.http.headers.HttpHeaders
 import com.cjwwdev.logging.Logging
 import com.cjwwdev.responses.ApiResponse
+import com.cjwwdev.implicits.ImplicitDataSecurity._
 import com.typesafe.config.ConfigFactory
 import play.api.mvc.Results.Forbidden
 import play.api.http.Status.FORBIDDEN
@@ -33,28 +34,8 @@ case object Authenticated extends AuthorisationResult
 case object NotAuthorised extends AuthorisationResult
 
 trait BaseAuth extends HttpHeaders with Logging with ApiResponse {
-  private val config                   = ConfigFactory.load
-  private def service(service: String) = s"microservice.external-services.$service.application-id"
-
-  val DEVERSITY_FE_ID          = config.getString(service("deversity-frontend"))
-  val DEVERSITY_ID             = config.getString(service("deversity"))
-  val DIAG_ID                  = config.getString(service("diagnostics-frontend"))
-  val HUB_ID                   = config.getString(service("hub-frontend"))
-  val AUTH_SERVICE_ID          = config.getString(service("auth-service"))
-  val AUTH_MICROSERVICE_ID     = config.getString(service("auth-microservice"))
-  val ACCOUNTS_MICROSERVICE_ID = config.getString(service("accounts-microservice"))
-  val SESSION_STORE_ID         = config.getString(service("session-store"))
-
-  private val idSet = List(
-    DEVERSITY_FE_ID,
-    DEVERSITY_ID,
-    DIAG_ID,
-    HUB_ID,
-    AUTH_SERVICE_ID,
-    AUTH_MICROSERVICE_ID,
-    ACCOUNTS_MICROSERVICE_ID,
-    SESSION_STORE_ID
-  )
+  private val config      = ConfigFactory.load
+  val idSet: List[String] = config.getString("microservice.allowedApps").decrypt.split(",").toList
 
   protected def applicationVerification(f: => Future[Result])(implicit request: Request[_]): Future[Result] = {
     validateAppId match {
