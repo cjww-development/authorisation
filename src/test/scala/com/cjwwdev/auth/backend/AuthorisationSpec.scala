@@ -18,24 +18,27 @@ package com.cjwwdev.auth.backend
 
 import com.cjwwdev.auth.connectors.AuthConnector
 import com.cjwwdev.auth.models.CurrentUser
+import com.cjwwdev.config.{ConfigurationLoader, DefaultConfigurationLoader}
 import com.cjwwdev.http.headers.HeaderPackage
 import com.cjwwdev.implicits.ImplicitDataSecurity._
 import com.cjwwdev.testing.unit.UnitTestSpec
 import org.joda.time.{DateTime, DateTimeZone}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.mvc.{Request, Result}
 import play.api.mvc.Results.Ok
 import play.api.test.FakeRequest
 
 import scala.concurrent.Future
 
-class AuthorisationSpec extends UnitTestSpec {
+class AuthorisationSpec extends UnitTestSpec with GuiceOneAppPerSuite {
 
   val mockAuthConnector = mock[AuthConnector]
 
   class Setup extends Authorisation {
-    override val authConnector = mockAuthConnector
+    override protected val config = app.injector.instanceOf[DefaultConfigurationLoader]
+    override val authConnector    = mockAuthConnector
 
     def testAuthorisation(id: String)(implicit request: Request[_]): Future[Result] = authorised(id) { context =>
       Future.successful(Ok("testUserId"))
@@ -60,7 +63,7 @@ class AuthorisationSpec extends UnitTestSpec {
     "return an Ok" when {
       "an AuthContext has been found and the user id's match" in new Setup {
         implicit val request = FakeRequest()
-          .withHeaders("cjww-headers" -> HeaderPackage("testSessionStoreId", "testCookieId").encryptType)
+          .withHeaders("cjww-headers" -> HeaderPackage("testSessionStoreId", Some("testCookieId")).encrypt)
 
         when(mockAuthConnector.getCurrentUser(ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some(testUser)))
@@ -75,7 +78,7 @@ class AuthorisationSpec extends UnitTestSpec {
     "return a forbidden" when {
       "no AuthContext has been found" in new Setup {
         implicit val request = FakeRequest()
-          .withHeaders("cjww-headers" -> HeaderPackage("testSessionStoreId", "testCookieId").encryptType)
+          .withHeaders("cjww-headers" -> HeaderPackage("testSessionStoreId", Some("testCookieId")).encrypt)
 
         when(mockAuthConnector.getCurrentUser(ArgumentMatchers.any()))
           .thenReturn(Future.successful(None))
@@ -87,7 +90,7 @@ class AuthorisationSpec extends UnitTestSpec {
 
       "the users id don't match" in new Setup {
         implicit val request = FakeRequest()
-          .withHeaders("cjww-headers" -> HeaderPackage("testSessionStoreId", "testCookieId").encryptType)
+          .withHeaders("cjww-headers" -> HeaderPackage("testSessionStoreId", Some("testCookieId")).encrypt)
 
         when(mockAuthConnector.getCurrentUser(ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some(testUser)))

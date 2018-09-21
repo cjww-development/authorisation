@@ -16,7 +16,8 @@
 
 package com.cjwwdev.auth.models
 
-import play.api.data.validation.ValidationError
+import com.cjwwdev.security.deobfuscation.{DeObfuscation, DeObfuscator, DecryptionError}
+import com.cjwwdev.security.obfuscation.{Obfuscation, Obfuscator}
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
@@ -30,19 +31,6 @@ case class CurrentUser(contextId: String,
                        role: Option[String],
                        enrolments: Option[JsObject])
 
-/*
-*
-* contextId
-* id (userId)
-* credentialType (individual / organisation)
-* orgDeversityId (orgOnly)
-* orgName (orgOnly)
-* firstName (individualOnly)
-* lastName (individualOnly)
-* role (individualOnly)
-* enrolments (individualOnly)
-*/
-
 object CurrentUser {
   implicit val standardFormat: OFormat[CurrentUser] = (
     (__ \ "contextId").format[String] and
@@ -55,5 +43,13 @@ object CurrentUser {
     (__ \ "role").formatNullable[String] and
     (__ \ "enrolments").formatNullable[JsObject]
   )(CurrentUser.apply, unlift(CurrentUser.unapply))
+
+  implicit val deObfuscator: DeObfuscator[CurrentUser] = new DeObfuscator[CurrentUser] {
+    override def decrypt(value: String): Either[CurrentUser, DecryptionError] = DeObfuscation.deObfuscate[CurrentUser](value)
+  }
+
+  implicit val obfuscator: Obfuscator[CurrentUser] = new Obfuscator[CurrentUser] {
+    override def encrypt(value: CurrentUser): String = Obfuscation.obfuscateJson(Json.toJson(value))
+  }
 }
 

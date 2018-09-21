@@ -32,8 +32,8 @@ trait Authentication extends BaseAuth with Logging with ApiResponse {
   protected def authenticated(id: String)(f: => Future[Result])(implicit request: Request[_]): Future[Result] = {
     authConnector.getCurrentUser flatMap { context =>
       mapToAuthResult(id, context) match {
-        case Authenticated  => f
-        case _              => withFutureJsonResponseBody(FORBIDDEN, "The user could not be authenticated") { json =>
+        case Authenticated => f
+        case _ => withFutureJsonResponseBody(FORBIDDEN, "The user could not be authenticated") { json =>
           Future(Forbidden(json))
         }
       }

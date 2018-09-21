@@ -18,11 +18,13 @@ package com.cjwwdev.auth.connectors
 
 import com.cjwwdev.auth.helpers.MockHttpResponse
 import com.cjwwdev.auth.models.CurrentUser
+import com.cjwwdev.auth.models.CurrentUser._
 import com.cjwwdev.http.exceptions.NotFoundException
 import com.cjwwdev.http.headers.HeaderPackage
 import com.cjwwdev.http.verbs.Http
-import com.cjwwdev.security.encryption.DataSecurity
 import com.cjwwdev.implicits.ImplicitDataSecurity._
+import com.cjwwdev.security.obfuscation.Obfuscation._
+import com.cjwwdev.security.obfuscation.{Obfuscation, Obfuscator}
 import com.cjwwdev.testing.unit.UnitTestSpec
 import com.cjwwdev.testing.unit.application.FakeAppPerTest
 import org.joda.time.{DateTime, DateTimeZone, LocalDateTime}
@@ -60,9 +62,9 @@ class AuthConnectorSpec extends UnitTestSpec with MockHttpResponse with FakeAppP
     override def sessionStoreUri(contextId: String): String = "/test"
   }
 
-  val testSessionId = DataSecurity.encryptString("testSessionId")
+  val testSessionId = "testSessionId".encrypt
 
-  def testApiResponse(statusCode: Int, json: JsValue): JsObject = Json.obj(
+  def testApiResponse(statusCode: Int, json: String): JsObject = Json.obj(
     "uri"       -> "/test/uri",
     "method"    -> "GET",
     "status"    -> statusCode,
@@ -75,18 +77,21 @@ class AuthConnectorSpec extends UnitTestSpec with MockHttpResponse with FakeAppP
 
   case class Context(contextId: String, other: Option[String] = None)
   implicit val format = Json.format[Context]
+  implicit val obfuscator: Obfuscator[Context] = new Obfuscator[Context] {
+    override def encrypt(value: Context): String = Obfuscation.obfuscateJson(Json.toJson(value))
+  }
 
   "getCurrentUser" should {
     "return an auth context" in {
       implicit val request = FakeRequest().withSession("cookieId" -> "testSessionId")
 
       when(mockHttp.constructHeaderPackageFromRequestHeaders(ArgumentMatchers.eq(request)))
-        .thenReturn(Some(HeaderPackage("testSessionStoreId", "testCookieId")))
+        .thenReturn(Some(HeaderPackage("testSessionStoreId", Some("testCookieId"))))
 
       when(mockHttp.get(ArgumentMatchers.any())(ArgumentMatchers.eq(request)))
         .thenReturn(
-          Future(mockWSResponse(OK, testApiResponse(OK, JsString(testSessionId.encrypt)))),
-          Future(mockWSResponse(OK, testApiResponse(OK, JsString(testUser.encryptType))))
+          Future(mockWSResponse(OK, testApiResponse(OK, testSessionId.encrypt))),
+          Future(mockWSResponse(OK, testApiResponse(OK, testUser.encrypt)))
         )
 
       val result = Await.result(testConnector.getCurrentUser, 5.seconds)
@@ -98,11 +103,11 @@ class AuthConnectorSpec extends UnitTestSpec with MockHttpResponse with FakeAppP
         implicit val request = FakeRequest().withSession("contextId" -> "testCID")
 
         when(mockHttp.constructHeaderPackageFromRequestHeaders(ArgumentMatchers.eq(request)))
-          .thenReturn(Some(HeaderPackage("testSessionStoreId", "testCookieId")))
+          .thenReturn(Some(HeaderPackage("testSessionStoreId", Some("testCookieId"))))
 
         when(mockHttp.get(ArgumentMatchers.any())(ArgumentMatchers.eq(request)))
           .thenReturn(
-            Future(mockWSResponse(OK, testApiResponse(OK, JsString(Context("testContextId").encryptType)))),
+            Future(mockWSResponse(OK, testApiResponse(OK, "testContextId".encrypt))),
             Future.failed(new NotFoundException("test message"))
           )
 
@@ -114,7 +119,7 @@ class AuthConnectorSpec extends UnitTestSpec with MockHttpResponse with FakeAppP
         implicit val request = FakeRequest()
 
         when(mockHttp.constructHeaderPackageFromRequestHeaders(ArgumentMatchers.eq(request)))
-          .thenReturn(Some(HeaderPackage("testSessionStoreId", "testSessionId")))
+          .thenReturn(Some(HeaderPackage("testSessionStoreId", Some("testSessionId"))))
 
         when(mockHttp.get(ArgumentMatchers.any())(ArgumentMatchers.eq(request)))
           .thenReturn(Future.failed(new NotFoundException("test message")))
@@ -127,7 +132,7 @@ class AuthConnectorSpec extends UnitTestSpec with MockHttpResponse with FakeAppP
         implicit val request = FakeRequest()
 
         when(mockHttp.constructHeaderPackageFromRequestHeaders(ArgumentMatchers.eq(request)))
-          .thenReturn(Some(HeaderPackage("testSessionStoreId", "")))
+          .thenReturn(Some(HeaderPackage("testSessionStoreId", None)))
 
         when(mockHttp.get(ArgumentMatchers.any())(ArgumentMatchers.eq(request)))
           .thenReturn(Future.failed(new NotFoundException("test message")))

@@ -16,14 +16,18 @@
 
 package com.cjwwdev.auth.backend
 
+import com.cjwwdev.config.DefaultConfigurationLoader
 import com.cjwwdev.http.headers.HeaderPackage
-import com.cjwwdev.testing.unit.UnitTestSpec
 import com.cjwwdev.implicits.ImplicitDataSecurity._
+import com.cjwwdev.testing.unit.UnitTestSpec
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.test.FakeRequest
 
-class BaseAuthSpec extends UnitTestSpec {
+class BaseAuthSpec extends UnitTestSpec with GuiceOneAppPerSuite {
 
-  class Setup extends BaseAuth
+  class Setup extends BaseAuth {
+    override protected val config = app.injector.instanceOf[DefaultConfigurationLoader]
+  }
   
   "validateAppId" should {
     "return NotAuthorised" when {
@@ -37,7 +41,7 @@ class BaseAuthSpec extends UnitTestSpec {
 
       "An unknown appId is found in the request header" in new Setup {
         val request = FakeRequest()
-          .withHeaders("cjww-headers" -> HeaderPackage("unknown app id", "testCookieId").encryptType)
+          .withHeaders("cjww-headers" -> HeaderPackage("unknown app id", Some("testCookieId")).encrypt)
 
         val result = validateAppId(request)
 
@@ -48,7 +52,7 @@ class BaseAuthSpec extends UnitTestSpec {
     "return Authenticated" when {
       "a valid appId is found in the headers" in new Setup {
         val request = FakeRequest()
-          .withHeaders("cjww-headers" -> HeaderPackage("testSessionStoreId", "testCookieId").encryptType)
+          .withHeaders("cjww-headers" -> HeaderPackage("testSessionStoreId", Some("testCookieId")).encrypt)
 
         val result = validateAppId(request)
 

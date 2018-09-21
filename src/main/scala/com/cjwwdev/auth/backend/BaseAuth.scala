@@ -20,6 +20,8 @@ import com.cjwwdev.http.headers.HttpHeaders
 import com.cjwwdev.logging.Logging
 import com.cjwwdev.responses.ApiResponse
 import com.cjwwdev.implicits.ImplicitDataSecurity._
+import com.cjwwdev.security.deobfuscation.DeObfuscation._
+import com.cjwwdev.security.deobfuscation.DeObfuscator
 import com.typesafe.config.ConfigFactory
 import play.api.mvc.Results.Forbidden
 import play.api.http.Status.FORBIDDEN
@@ -34,13 +36,17 @@ case object Authenticated extends AuthorisationResult
 case object NotAuthorised extends AuthorisationResult
 
 trait BaseAuth extends HttpHeaders with Logging with ApiResponse {
-  private val config      = ConfigFactory.load
-  val idSet: List[String] = config.getString("microservice.allowedApps").decrypt.split(",").toList
+  private val configuration = ConfigFactory.load
+
+  val idSet: List[String] = configuration.getString("microservice.allowedApps").decrypt[String].fold(
+    _.split(",").toList,
+    err => throw err
+  )
 
   protected def applicationVerification(f: => Future[Result])(implicit request: Request[_]): Future[Result] = {
     validateAppId match {
       case Authenticated  => f
-      case _              => withFutureJsonResponseBody(FORBIDDEN, "The calling application could not be verified") { json =>
+      case _ => withFutureJsonResponseBody(FORBIDDEN, "The calling application could not be verified") { json =>
         Future(Forbidden(json))
       }
     }

@@ -25,9 +25,9 @@ val btVersion: String = Try(ConfigFactory.load.getString("version")) match {
 }
 
 val dependencies: Seq[ModuleID] = Seq(
-  "com.cjww-dev.libs" %% "http-verbs"            % "3.1.0",
-  "com.cjww-dev.libs" %% "application-utilities" % "4.1.0",
-  "com.typesafe.play" %  "play_2.12"             % "2.6.15",
+  "com.cjww-dev.libs" %% "http-verbs"            % "3.2.1",
+  "com.cjww-dev.libs" %% "application-utilities" % "4.3.2",
+  "com.typesafe.play" %  "play_2.12"             % "2.6.19",
   "com.cjww-dev.libs" %% "testing-framework"     % "3.2.0"   % Test
 )
 
@@ -46,6 +46,6 @@ lazy val library = Project(libraryName, file("."))
     javaOptions             in Test      :=  Seq(
       "-Ddata-security.key=testKey",
       "-Ddata-security.salt=testSalt",
-      "-Dmicroservice.allowedApps=M0VbBTxNa0CoJXhZMlcPpjD5iPpLluq88muJVq2nhKdQ-519MpWt1vTeZmMYCUk4Ewfx2_XXY27txe0Om2kSYHr4ZBq246ngTlhPhWQIIHNNTNAF7MHOKbxxxF-gHbT-W9Q4kf6efdmRpgD6AJB-Mg"
+      "-Dmicroservice.allowedApps=2d2gXkJYZcqjktKBDxP1vOTMItOpaa2qdHrRDFskNW5aXtPAl66ulnHNMXZ8kDmOOQQLxXdFFyIhVi8-t6YL7iXgPDPoG2cnhLCi2NZZfyCrqUu-8PomBgvoDOo6B9gN0nAzw_Fp6KYQnzAhmlc7Lg"
     )
   )

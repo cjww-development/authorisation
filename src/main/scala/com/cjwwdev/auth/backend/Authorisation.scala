@@ -32,7 +32,7 @@ trait Authorisation extends BaseAuth {
     authConnector.getCurrentUser flatMap { context =>
       mapToAuthResult(id, context) match {
         case Authorised(ac) => f(ac)
-        case _              => withFutureJsonResponseBody(FORBIDDEN, "The user is not authorised to access this resource") { json =>
+        case _ => withFutureJsonResponseBody(FORBIDDEN, "The user is not authorised to access this resource") { json =>
           Future(Forbidden(json))
         }
       }
@@ -42,7 +42,7 @@ trait Authorisation extends BaseAuth {
   private def mapToAuthResult(id: String, currentUser: Option[CurrentUser])(implicit request: Request[_]): AuthorisationResult = {
     validateAppId match {
       case Authenticated => currentUser.fold(notAuthorised)(ac => if(id == ac.id) authorised(ac) else notAuthorised)
-      case _             => notAuthorised
+      case _ => notAuthorised
     }
   }
 

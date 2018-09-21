@@ -24,24 +24,20 @@ import play.api.mvc._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait AuthorisedAction extends Results with Logging {
+trait AuthorisedAction extends BaseController with Logging {
   private type AuthorisedAction = Request[AnyContent] => CurrentUser => Future[Result]
-
-  val controllerComponents: ControllerComponents
-
-  private def action: ActionBuilder[Request, AnyContent] = controllerComponents.actionBuilder
 
   protected def authConnector: AuthConnector
   protected def unauthorisedRedirect: Call
 
-  def isAuthorised(f: => AuthorisedAction): Action[AnyContent] = action.async { implicit request =>
+  def isAuthorised(f: => AuthorisedAction): Action[AnyContent] = Action.async { implicit request =>
     authConnector.getCurrentUser flatMap {
       case Some(user) =>
         logger.info(s"Authenticated as ${user.id} on ${request.path}")
         f(request)(user)
       case _          =>
         logger.warn(s"Unauthenticated user attempting to access ${request.path}; redirecting to login")
-        action(Redirect(unauthorisedRedirect))(request)
+        Action(Redirect(unauthorisedRedirect))(request)
     }
   }
 }
