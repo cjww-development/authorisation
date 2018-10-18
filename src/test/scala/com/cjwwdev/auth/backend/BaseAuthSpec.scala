@@ -16,17 +16,15 @@
 
 package com.cjwwdev.auth.backend
 
-import com.cjwwdev.config.DefaultConfigurationLoader
 import com.cjwwdev.http.headers.HeaderPackage
 import com.cjwwdev.implicits.ImplicitDataSecurity._
 import com.cjwwdev.testing.unit.UnitTestSpec
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.test.FakeRequest
 
-class BaseAuthSpec extends UnitTestSpec with GuiceOneAppPerSuite {
+class BaseAuthSpec extends UnitTestSpec {
 
   class Setup extends BaseAuth {
-    override protected val config = app.injector.instanceOf[DefaultConfigurationLoader]
+    override val appId: String = "testAppId"
   }
   
   "validateAppId" should {

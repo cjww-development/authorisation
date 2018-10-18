@@ -18,27 +18,25 @@ package com.cjwwdev.auth.backend
 
 import com.cjwwdev.auth.connectors.AuthConnector
 import com.cjwwdev.auth.models.CurrentUser
-import com.cjwwdev.config.DefaultConfigurationLoader
 import com.cjwwdev.http.headers.HeaderPackage
 import com.cjwwdev.implicits.ImplicitDataSecurity._
 import com.cjwwdev.testing.unit.UnitTestSpec
 import org.joda.time.{DateTime, DateTimeZone}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.mvc.Results.Ok
 import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 
 import scala.concurrent.Future
 
-class AuthenticationSpec extends UnitTestSpec with GuiceOneAppPerSuite {
+class AuthenticationSpec extends UnitTestSpec {
 
   val mockAuthConnector = mock[AuthConnector]
 
   class Setup extends Authentication {
-    override val authConnector    = mockAuthConnector
-    override protected val config = app.injector.instanceOf[DefaultConfigurationLoader]
+    override val authConnector = mockAuthConnector
+    override val appId: String = "testAppId"
 
     def testAuthentication(implicit request: Request[_]): Future[Result] = authenticated("testUserId") {
       Future.successful(Ok)

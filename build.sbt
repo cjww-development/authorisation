@@ -25,16 +25,16 @@ val btVersion: String = Try(ConfigFactory.load.getString("version")) match {
 }
 
 val dependencies: Seq[ModuleID] = Seq(
-  "com.cjww-dev.libs" %% "http-verbs"            % "3.2.1",
+  "com.cjww-dev.libs" %% "http-verbs"            % "3.3.0",
   "com.cjww-dev.libs" %% "application-utilities" % "4.3.2",
-  "com.typesafe.play" %  "play_2.12"             % "2.6.19",
+  "com.typesafe.play" %  "play_2.12"             % "2.6.20",
   "com.cjww-dev.libs" %% "testing-framework"     % "3.2.0"   % Test
 )
 
 lazy val library = Project(libraryName, file("."))
   .settings(
     version                              :=  btVersion,
-    scalaVersion                         :=  "2.12.6",
+    scalaVersion                         :=  "2.12.7",
     organization                         :=  "com.cjww-dev.libs",
     resolvers                            +=  "cjww-dev" at "http://dl.bintray.com/cjww-development/releases",
     libraryDependencies                  ++= dependencies,

@@ -22,8 +22,8 @@ import com.cjwwdev.testing.unit.UnitTestSpec
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.libs.json.Json
-import play.api.mvc.{Call, ControllerComponents, Result}
 import play.api.mvc.Results.{NotFound, Ok}
+import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
