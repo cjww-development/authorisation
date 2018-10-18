@@ -18,7 +18,6 @@ package com.cjwwdev.auth.connectors
 
 import com.cjwwdev.auth.helpers.MockHttpResponse
 import com.cjwwdev.auth.models.CurrentUser
-import com.cjwwdev.auth.models.CurrentUser._
 import com.cjwwdev.http.exceptions.NotFoundException
 import com.cjwwdev.http.headers.HeaderPackage
 import com.cjwwdev.http.verbs.Http
@@ -26,17 +25,16 @@ import com.cjwwdev.implicits.ImplicitDataSecurity._
 import com.cjwwdev.security.obfuscation.Obfuscation._
 import com.cjwwdev.security.obfuscation.{Obfuscation, Obfuscator}
 import com.cjwwdev.testing.unit.UnitTestSpec
-import com.cjwwdev.testing.unit.application.FakeAppPerTest
 import org.joda.time.{DateTime, DateTimeZone, LocalDateTime}
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
-import play.api.libs.json.{JsObject, JsString, JsValue, Json}
+import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-class AuthConnectorSpec extends UnitTestSpec with MockHttpResponse with FakeAppPerTest {
+class AuthConnectorSpec extends UnitTestSpec with MockHttpResponse {
 
   final val now = new DateTime(DateTimeZone.UTC)
 
