@@ -38,7 +38,7 @@ class AuthorisationSpec extends UnitTestSpec {
     override val appId: String = "testAppId"
     override val authConnector = mockAuthConnector
 
-    def testAuthorisation(id: String)(implicit request: Request[_]): Future[Result] = authorised(id) { context =>
+    def testAuthorisation(id: String)(implicit request: Request[_]): Future[Result] = authorised(id) { _ =>
       Future.successful(Ok("testUserId"))
     }
   }
@@ -63,7 +63,7 @@ class AuthorisationSpec extends UnitTestSpec {
         implicit val request = FakeRequest()
           .withHeaders("cjww-headers" -> HeaderPackage("testSessionStoreId", Some("testCookieId")).encrypt)
 
-        when(mockAuthConnector.getCurrentUser(ArgumentMatchers.any()))
+        when(mockAuthConnector.getCurrentUser(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some(testUser)))
 
         val result = testAuthorisation("testUserId")
@@ -78,7 +78,7 @@ class AuthorisationSpec extends UnitTestSpec {
         implicit val request = FakeRequest()
           .withHeaders("cjww-headers" -> HeaderPackage("testSessionStoreId", Some("testCookieId")).encrypt)
 
-        when(mockAuthConnector.getCurrentUser(ArgumentMatchers.any()))
+        when(mockAuthConnector.getCurrentUser(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(None))
 
         val result = testAuthorisation("testMismatchId")
@@ -90,7 +90,7 @@ class AuthorisationSpec extends UnitTestSpec {
         implicit val request = FakeRequest()
           .withHeaders("cjww-headers" -> HeaderPackage("testSessionStoreId", Some("testCookieId")).encrypt)
 
-        when(mockAuthConnector.getCurrentUser(ArgumentMatchers.any()))
+        when(mockAuthConnector.getCurrentUser(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some(testUser)))
 
         val result = testAuthorisation("testMismatchId")

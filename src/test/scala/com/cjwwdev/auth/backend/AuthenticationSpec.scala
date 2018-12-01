@@ -63,7 +63,7 @@ class AuthenticationSpec extends UnitTestSpec {
         implicit val request = FakeRequest()
           .withHeaders("cjww-headers" -> HeaderPackage("testSessionStoreId", Some("testCookieId")).encrypt)
 
-        when(mockAuthConnector.getCurrentUser(ArgumentMatchers.any()))
+        when(mockAuthConnector.getCurrentUser(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some(testUser)))
 
         val result = testAuthentication
@@ -76,7 +76,7 @@ class AuthenticationSpec extends UnitTestSpec {
         implicit val request = FakeRequest()
           .withHeaders("cjww-headers" -> HeaderPackage("testSessionStoreId", Some("testCookieId")).encrypt)
 
-        when(mockAuthConnector.getCurrentUser(ArgumentMatchers.any()))
+        when(mockAuthConnector.getCurrentUser(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(None))
 
         val result = testAuthentication

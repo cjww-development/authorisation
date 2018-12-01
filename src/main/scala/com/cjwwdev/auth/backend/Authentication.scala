@@ -23,18 +23,17 @@ import play.api.mvc.Results.Forbidden
 import play.api.http.Status.FORBIDDEN
 import play.api.mvc.{Request, Result}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext => ExC, Future}
 
 trait Authentication extends BaseAuth with Logging with ApiResponse {
   val authConnector: AuthConnector
 
-  protected def authenticated(id: String)(f: => Future[Result])(implicit request: Request[_]): Future[Result] = {
+  protected def authenticated(id: String)(f: => Future[Result])(implicit ec: ExC, request: Request[_]): Future[Result] = {
     authConnector.getCurrentUser flatMap { context =>
       mapToAuthResult(id, context) match {
         case Authenticated => f
         case _ => withFutureJsonResponseBody(FORBIDDEN, "The user could not be authenticated") { json =>
-          Future(Forbidden(json))
+          Future.successful(Forbidden(json))
         }
       }
     }
@@ -47,13 +46,13 @@ trait Authentication extends BaseAuth with Logging with ApiResponse {
     }
   }
 
-  private def authorised(id: String): AuthorisationResult = {
-    logger.info(s"[mapToAuthResult]: User authorised as $id")
+  private def authorised(id: String)(implicit request: Request[_]): AuthorisationResult = {
+    LogAt.info(s"[mapToAuthResult]: User authorised as $id")
     Authenticated
   }
 
-  private def notAuthorised: AuthorisationResult = {
-    logger.warn("[mapToAuthResult]: User not authorised action deemed forbidden")
+  private def notAuthorised(implicit request: Request[_]): AuthorisationResult = {
+    LogAt.warn("[mapToAuthResult]: User not authorised action deemed forbidden")
     NotAuthorised
   }
 }

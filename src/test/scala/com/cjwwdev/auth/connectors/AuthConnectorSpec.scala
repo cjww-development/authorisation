@@ -18,7 +18,6 @@ package com.cjwwdev.auth.connectors
 
 import com.cjwwdev.auth.helpers.MockHttpResponse
 import com.cjwwdev.auth.models.CurrentUser
-import com.cjwwdev.http.exceptions.NotFoundException
 import com.cjwwdev.http.headers.HeaderPackage
 import com.cjwwdev.http.verbs.Http
 import com.cjwwdev.implicits.ImplicitDataSecurity._
@@ -30,6 +29,7 @@ import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.when
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.FakeRequest
+import com.cjwwdev.http.responses.EvaluateResponse.{SuccessResponse, ErrorResponse}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -54,9 +54,9 @@ class AuthConnectorSpec extends UnitTestSpec with MockHttpResponse {
 
   val testConnector = new AuthConnector {
     override val http                                       = mockHttp
-    override def authUrl: String                            = "/test/auth-microservice"
+    override val authUrl: String                            = "/test/auth-microservice"
     override def authUri(cookieId: String)                  = "/test"
-    override def sessionStoreUrl: String                    = "/test/session-store"
+    override val sessionStoreUrl: String                    = "/test/session-store"
     override def sessionStoreUri(contextId: String): String = "/test"
   }
 
@@ -86,10 +86,10 @@ class AuthConnectorSpec extends UnitTestSpec with MockHttpResponse {
       when(mockHttp.constructHeaderPackageFromRequestHeaders(ArgumentMatchers.eq(request)))
         .thenReturn(Some(HeaderPackage("testSessionStoreId", Some("testCookieId"))))
 
-      when(mockHttp.get(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.eq(request)))
+      when(mockHttp.get(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.eq(request)))
         .thenReturn(
-          Future(mockWSResponse(OK, testApiResponse(OK, testSessionId.encrypt))),
-          Future(mockWSResponse(OK, testApiResponse(OK, testUser.encrypt)))
+          Future.successful(SuccessResponse(mockWSResponse(OK, testApiResponse(OK, testSessionId.encrypt)))),
+          Future.successful(SuccessResponse(mockWSResponse(OK, testApiResponse(OK, testUser.encrypt))))
         )
 
       val result = Await.result(testConnector.getCurrentUser, 5.seconds)
@@ -103,10 +103,10 @@ class AuthConnectorSpec extends UnitTestSpec with MockHttpResponse {
         when(mockHttp.constructHeaderPackageFromRequestHeaders(ArgumentMatchers.eq(request)))
           .thenReturn(Some(HeaderPackage("testSessionStoreId", Some("testCookieId"))))
 
-        when(mockHttp.get(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.eq(request)))
+        when(mockHttp.get(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.eq(request)))
           .thenReturn(
-            Future(mockWSResponse(OK, testApiResponse(OK, "testContextId".encrypt))),
-            Future.failed(new NotFoundException("test message"))
+            Future.successful(SuccessResponse(mockWSResponse(OK, testApiResponse(OK, "testContextId".encrypt)))),
+            Future.successful(ErrorResponse(mockWSResponse(NOT_FOUND, testApiResponse(NOT_FOUND, ""))))
           )
 
         val result = Await.result(testConnector.getCurrentUser, 5.seconds)
@@ -119,8 +119,8 @@ class AuthConnectorSpec extends UnitTestSpec with MockHttpResponse {
         when(mockHttp.constructHeaderPackageFromRequestHeaders(ArgumentMatchers.eq(request)))
           .thenReturn(Some(HeaderPackage("testSessionStoreId", Some("testSessionId"))))
 
-        when(mockHttp.get(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.eq(request)))
-          .thenReturn(Future.failed(new NotFoundException("test message")))
+        when(mockHttp.get(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.eq(request)))
+          .thenReturn(Future.successful(ErrorResponse(mockWSResponse(NOT_FOUND, testApiResponse(NOT_FOUND, "")))))
 
         val result = Await.result(testConnector.getCurrentUser, 5.seconds)
         result mustBe None
@@ -132,8 +132,8 @@ class AuthConnectorSpec extends UnitTestSpec with MockHttpResponse {
         when(mockHttp.constructHeaderPackageFromRequestHeaders(ArgumentMatchers.eq(request)))
           .thenReturn(Some(HeaderPackage("testSessionStoreId", None)))
 
-        when(mockHttp.get(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.eq(request)))
-          .thenReturn(Future.failed(new NotFoundException("test message")))
+        when(mockHttp.get(ArgumentMatchers.any(), ArgumentMatchers.any())(ArgumentMatchers.any(), ArgumentMatchers.eq(request)))
+          .thenReturn(Future.successful(ErrorResponse(mockWSResponse(NOT_FOUND, testApiResponse(NOT_FOUND, "")))))
 
         val result = Await.result(testConnector.getCurrentUser, 5.seconds)
         result mustBe None
