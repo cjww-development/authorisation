@@ -18,25 +18,24 @@ package com.cjwwdev.auth.frontend
 
 import com.cjwwdev.auth.connectors.AuthConnector
 import com.cjwwdev.auth.models.CurrentUser
-import com.cjwwdev.logging.Logging
+import com.cjwwdev.logging.output.Logger
 import play.api.mvc._
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{Future, ExecutionContext => ExC}
 
-trait AuthorisedAction extends BaseController with Logging {
+trait AuthorisedAction extends BaseController with Logger {
   private type AuthorisedAction = Request[AnyContent] => CurrentUser => Future[Result]
 
-  protected def authConnector: AuthConnector
+  protected val authConnector: AuthConnector
   protected def unauthorisedRedirect: Call
 
-  def isAuthorised(f: => AuthorisedAction): Action[AnyContent] = Action.async { implicit request =>
+  def isAuthorised(f: => AuthorisedAction)(implicit ec: ExC): Action[AnyContent] = Action.async { implicit request =>
     authConnector.getCurrentUser flatMap {
       case Some(user) =>
-        logger.info(s"Authenticated as ${user.id} on ${request.path}")
+        LogAt.info(s"Authenticated as ${user.id} on ${request.path}")
         f(request)(user)
       case _          =>
-        logger.warn(s"Unauthenticated user attempting to access ${request.path}; redirecting to login")
+        LogAt.warn(s"Unauthenticated user attempting to access ${request.path}; redirecting to login")
         Action(Redirect(unauthorisedRedirect))(request)
     }
   }

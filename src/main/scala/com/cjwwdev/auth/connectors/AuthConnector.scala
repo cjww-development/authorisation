@@ -19,13 +19,12 @@ import javax.inject.Inject
 import com.cjwwdev.auth.models.CurrentUser
 import com.cjwwdev.auth.models.CurrentUser._
 import com.cjwwdev.config.ConfigurationLoader
-import com.cjwwdev.http.exceptions.NotFoundException
 import com.cjwwdev.http.responses.WsResponseHelpers
 import com.cjwwdev.http.verbs.Http
+import com.cjwwdev.http.responses.EvaluateResponse.{SuccessResponse, ErrorResponse}
 import play.api.mvc.Request
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext => ExC,Future}
 
 class AuthConnectorImpl @Inject()(val http: Http, val configLoader: ConfigurationLoader) extends AuthConnector {
   val authUrl: String = configLoader.getServiceUrl("auth-microservice")
@@ -46,26 +45,37 @@ class AuthConnectorImpl @Inject()(val http: Http, val configLoader: Configuratio
 trait AuthConnector extends WsResponseHelpers {
   val http: Http
 
-  def authUrl: String
+  val authUrl: String
   def authUri(cookieId: String): String
 
-  def sessionStoreUrl: String
+  val sessionStoreUrl: String
   def sessionStoreUri(contextId: String): String
 
-  def getCurrentUser(implicit request: Request[_]): Future[Option[CurrentUser]] = {
-    http.constructHeaderPackageFromRequestHeaders.fold(Future(Option.empty[CurrentUser])) { headers =>
-      headers.cookieId.fold(Future(Option.empty[CurrentUser])) { cookieId =>
-        http.get(s"$sessionStoreUrl${sessionStoreUri(cookieId)}") flatMap { sessionResp =>
-          val cookieId = sessionResp.toResponseString(needsDecrypt = true)
-          http.get(s"$authUrl${authUri(cookieId)}") map { contextResp =>
-            Some(contextResp.toDataType[CurrentUser](needsDecrypt = true))
-          } recover {
-            case _: NotFoundException => None
-          }
-        } recover {
-          case _: NotFoundException => None
-        }
+  private type User = Option[CurrentUser]
+
+  def getCurrentUser(implicit ec: ExC, request: Request[_]): Future[User] = {
+    getCookieId.fold(Future.successful(Option.empty[CurrentUser])) { cookieId =>
+      consultSessionStore(cookieId) {
+        consultAuth(_)
       }
+    }
+  }
+
+  private def getCookieId(implicit ec: ExC, request: Request[_]): Option[String] = {
+    http.constructHeaderPackageFromRequestHeaders.fold(Option.empty[String])(_.cookieId)
+  }
+
+  private def consultSessionStore(cookieId: String)(f: String => Future[User])(implicit ec: ExC, request: Request[_]): Future[User] = {
+    http.get(s"$sessionStoreUrl${sessionStoreUri(cookieId)}") flatMap {
+      case SuccessResponse(resp) => resp.toResponseString(needsDecrypt = true).fold(f(_), _ => Future.successful(None))
+      case ErrorResponse(_)      => Future.successful(None)
+    }
+  }
+
+  private def consultAuth(contextId: String)(implicit ec: ExC, request: Request[_]): Future[User] = {
+    http.get(s"$authUrl${authUri(contextId)}") map {
+      case SuccessResponse(resp) => resp.toDataType[CurrentUser](needsDecrypt = true).fold(Some(_), _ => None)
+      case ErrorResponse(_)      => None
     }
   }
 }

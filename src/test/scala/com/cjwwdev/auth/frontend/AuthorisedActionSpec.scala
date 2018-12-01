@@ -28,6 +28,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class AuthorisedActionSpec extends UnitTestSpec {
 
@@ -37,7 +38,7 @@ class AuthorisedActionSpec extends UnitTestSpec {
   val testAuthAction = new AuthorisedAction {
     override val controllerComponents = stubControllerComponents()
     override def unauthorisedRedirect = testLoginRedirect
-    override def authConnector        = mockAuthConnector
+    override val authConnector        = mockAuthConnector
   }
 
   val testUser = CurrentUser(
@@ -59,12 +60,12 @@ class AuthorisedActionSpec extends UnitTestSpec {
     "return Some CurrentUser" when {
       "a user has been successfully authenticated" in {
 
-        when(mockAuthConnector.getCurrentUser(ArgumentMatchers.any()))
+        when(mockAuthConnector.getCurrentUser(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(Some(testUser)))
 
         val result = testAuthAction.isAuthorised { _ => _ =>
           okFunction
-        }(FakeRequest())
+        }(global)(FakeRequest())
 
         status(result) mustBe OK
         contentAsJson(result) mustBe Json.toJson(testUser)
@@ -73,12 +74,12 @@ class AuthorisedActionSpec extends UnitTestSpec {
 
     "return None" when {
       "a user has not been successfully authenticated" in {
-        when(mockAuthConnector.getCurrentUser(ArgumentMatchers.any()))
+        when(mockAuthConnector.getCurrentUser(ArgumentMatchers.any(), ArgumentMatchers.any()))
           .thenReturn(Future.successful(None))
 
         val result = testAuthAction.isAuthorised { _ => _ =>
           okFunction
-        }(FakeRequest())
+        }(global)(FakeRequest())
 
         status(result) mustBe SEE_OTHER
         redirectLocation(result) mustBe Some("/")

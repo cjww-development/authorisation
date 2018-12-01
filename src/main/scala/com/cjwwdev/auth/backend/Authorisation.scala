@@ -18,22 +18,22 @@ package com.cjwwdev.auth.backend
 
 import com.cjwwdev.auth.connectors.AuthConnector
 import com.cjwwdev.auth.models.CurrentUser
+import com.cjwwdev.logging.output.Logger
 import play.api.mvc.Results.Forbidden
 import play.api.http.Status.FORBIDDEN
 import play.api.mvc.{Request, Result}
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext => ExC, Future}
 
-trait Authorisation extends BaseAuth {
+trait Authorisation extends BaseAuth with Logger {
   val authConnector: AuthConnector
 
-  protected def authorised(id: String)(f: CurrentUser => Future[Result])(implicit request: Request[_]): Future[Result] = {
+  protected def authorised(id: String)(f: CurrentUser => Future[Result])(implicit request: Request[_], ec: ExC): Future[Result] = {
     authConnector.getCurrentUser flatMap { context =>
       mapToAuthResult(id, context) match {
         case Authorised(ac) => f(ac)
         case _ => withFutureJsonResponseBody(FORBIDDEN, "The user is not authorised to access this resource") { json =>
-          Future(Forbidden(json))
+          Future.successful(Forbidden(json))
         }
       }
     }
@@ -42,17 +42,17 @@ trait Authorisation extends BaseAuth {
   private def mapToAuthResult(id: String, currentUser: Option[CurrentUser])(implicit request: Request[_]): AuthorisationResult = {
     validateAppId match {
       case Authenticated => currentUser.fold(notAuthorised)(ac => if(id == ac.id) authorised(ac) else notAuthorised)
-      case _ => notAuthorised
+      case _             => notAuthorised
     }
   }
 
-  private def authorised(currentUser: CurrentUser): AuthorisationResult = {
-    logger.info(s"[mapToAuthResult]: User authorised as ${currentUser.id}")
+  private def authorised(currentUser: CurrentUser)(implicit request: Request[_]): AuthorisationResult = {
+    LogAt.info(s"[mapToAuthResult]: User authorised as ${currentUser.id}")
     Authorised(currentUser)
   }
 
-  private def notAuthorised: AuthorisationResult = {
-    logger.warn("[mapToAuthResult]: User not authorised action deemed forbidden")
+  private def notAuthorised(implicit request: Request[_]): AuthorisationResult = {
+    LogAt.warn("[mapToAuthResult]: User not authorised action deemed forbidden")
     NotAuthorised
   }
 }
