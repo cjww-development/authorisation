@@ -36,7 +36,7 @@ trait AuthorisedAction extends BaseController with Logger {
         f(request)(user)
       case _          =>
         LogAt.warn(s"Unauthenticated user attempting to access ${request.path}; redirecting to login")
-        Action(Redirect(unauthorisedRedirect))(request)
+        Action(Redirect(unauthorisedRedirect).withNewSession)(request)
     }
   }
 }
